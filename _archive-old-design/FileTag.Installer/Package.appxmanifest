@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+         IgnorableNamespaces="uap rescap com">
+
+  <Identity Name="FileTag" Publisher="CN=FileTagDev" Version="1.0.0.0"/>
+
+  <Properties>
+    <DisplayName>FileTag</DisplayName>
+    <PublisherDisplayName>FileTag Developer</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.22621.0"/>
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us"/>
+  </Resources>
+
+  <Applications>
+    <Application Id="FileTagUI" Executable="FileTag.UI\FileTag.UI.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements DisplayName="FileTag" Description="Attach comments to files"
+                          BackgroundColor="transparent"
+                          Square150x150Logo="Assets\Square150x150Logo.png"
+                          Square44x44Logo="Assets\Square44x44Logo.png"/>
+    </Application>
+  </Applications>
+
+  <Extensions>
+    <!-- COM server for shell extension -->
+    <com:Extension Category="windows.comServer">
+      <com:ComServer>
+        <com:ExeServer Executable="FileTag.UI\FileTag.UI.exe" DisplayName="FileTag">
+          <com:Class Id="A1B2C3D4-E5F6-7890-ABCD-EF1234567890" DisplayName="FileTag Context Menu"/>
+          <com:Class Id="B2C3D4E5-F6A7-8901-BCDE-F12345678901" DisplayName="FileTag Icon Overlay"/>
+          <com:Class Id="C4D5E6F7-A8B9-0123-1234-567890000005" DisplayName="FileTag Preview Handler"/>
+        </com:ExeServer>
+      </com:ComServer>
+    </com:Extension>
+  </Extensions>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust"/>
+  </Capabilities>
+</Package>

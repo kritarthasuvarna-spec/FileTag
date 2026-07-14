@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>2.0.0</Version>
+    <ApplicationIcon>filetag.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyTitle>FileTag</AssemblyTitle>
+    <Product>FileTag</Product>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FileTag.Core\FileTag.Core.csproj" />
+  </ItemGroup>
+
+</Project>
