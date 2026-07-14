@@ -4,7 +4,11 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
+using FileTag.App.Settings;
 using FileTag.Core;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
 
 namespace FileTag.App;
 
@@ -31,6 +35,8 @@ public partial class OverlayBar : Window
     private IntPtr _explorerHwnd;
     private bool _hiding;
 
+    private readonly DispatcherTimer _autoHide = new();
+
     public OverlayBar()
     {
         InitializeComponent();
@@ -40,6 +46,48 @@ public partial class OverlayBar : Window
             SetNoActivate(true);
         };
         SizeChanged += (_, _) => { if (State != BarState.Hidden) Reposition(); };
+
+        _autoHide.Tick += (_, _) =>
+        {
+            // Don't hide under the user's cursor — check again in a bit.
+            if (IsMouseOver) return;
+            _autoHide.Stop();
+            if (State == BarState.Read) HideBar();
+        };
+
+        ApplySettings();
+        SettingsService.Instance.SettingsChanged += () =>
+        {
+            ApplySettings();
+            if (State != BarState.Hidden) Reposition();
+        };
+    }
+
+    /// <summary>Pulls live values from AppSettings (accent color, edge shape).</summary>
+    private void ApplySettings()
+    {
+        var s = SettingsService.Instance.Current;
+        try
+        {
+            Resources["AccentBrush"] = new SolidColorBrush(
+                (Color)ColorConverter.ConvertFromString(s.AccentColor));
+        }
+        catch { /* invalid hex — keep previous accent */ }
+        RootBorder.CornerRadius = s.IsBottomEdge
+            ? new CornerRadius(12, 12, 0, 0)
+            : new CornerRadius(0, 0, 12, 12);
+        RootBorder.BorderThickness = s.IsBottomEdge
+            ? new Thickness(1, 1, 1, 0)
+            : new Thickness(1, 0, 1, 1);
+    }
+
+    private void RestartAutoHide()
+    {
+        _autoHide.Stop();
+        var s = SettingsService.Instance.Current;
+        if (s.StayUntilDismissed) return;
+        _autoHide.Interval = TimeSpan.FromSeconds(Math.Clamp(s.AutoHideSeconds, 2, 15));
+        _autoHide.Start();
     }
 
     public IntPtr Handle => _hwnd;
@@ -67,6 +115,7 @@ public partial class OverlayBar : Window
         SetNoActivate(true);
         if (!alreadyVisible || !samePath) ShowWithSlide();
         else Reposition();
+        RestartAutoHide();
     }
 
     public void ShowEdit(string path, Note? existing, IntPtr explorerHwnd)
@@ -87,6 +136,7 @@ public partial class OverlayBar : Window
         EditBox.CaretIndex = EditBox.Text.Length; // cursor at end, per spec
         UpdateCounter();
 
+        _autoHide.Stop(); // an edit in progress never auto-hides
         SetNoActivate(false); // edit mode legitimately takes focus
         ShowWithSlide();
         Activate();
@@ -110,6 +160,7 @@ public partial class OverlayBar : Window
 
     public void HideBar()
     {
+        _autoHide.Stop();
         if (State == BarState.Hidden || _hiding) return;
         State = BarState.Hidden;
         CurrentPath = null;
@@ -191,33 +242,46 @@ public partial class OverlayBar : Window
         NativeMethods.SetWindowLong(_hwnd, NativeMethods.GWL_EXSTYLE, ex);
     }
 
+    /// <summary>Off-screen offset for the slide: positive when docked bottom, negative for top.</summary>
+    private double SlideOffset()
+    {
+        double h = Math.Max(ActualHeight, 40);
+        return SettingsService.Instance.Current.IsBottomEdge ? h : -h;
+    }
+
     private void ShowWithSlide()
     {
         _hiding = false;
         Show();
         Reposition();
-        double from = Math.Max(ActualHeight, 40);
-        SlideTransform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(from, 0,
+        if (!SettingsService.Instance.Current.SlideAnimation)
+        {
+            SlideTransform.BeginAnimation(TranslateTransform.YProperty, null);
+            SlideTransform.Y = 0;
+            return;
+        }
+        SlideTransform.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(SlideOffset(), 0,
             TimeSpan.FromMilliseconds(150)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } });
     }
 
     private void HideWithSlide()
     {
+        if (!SettingsService.Instance.Current.SlideAnimation) { Hide(); return; }
         _hiding = true;
-        double to = Math.Max(ActualHeight, 40);
-        var anim = new DoubleAnimation(0, to, TimeSpan.FromMilliseconds(150))
+        var anim = new DoubleAnimation(0, SlideOffset(), TimeSpan.FromMilliseconds(150))
         { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn } };
         anim.Completed += (_, _) => { if (_hiding) { Hide(); _hiding = false; } };
         SlideTransform.BeginAnimation(TranslateTransform.YProperty, anim);
     }
 
-    /// <summary>Dock to the bottom work-area edge of the monitor hosting the Explorer window.</summary>
+    /// <summary>Dock to the configured work-area edge of the target monitor
+    /// (Auto = the monitor hosting the Explorer window; or a manual pick).</summary>
     private void Reposition()
     {
         if (_hwnd == IntPtr.Zero) return;
+        var settings = SettingsService.Instance.Current;
 
-        IntPtr anchor = _explorerHwnd != IntPtr.Zero ? _explorerHwnd : _hwnd;
-        IntPtr monitor = NativeMethods.MonitorFromWindow(anchor, NativeMethods.MONITOR_DEFAULTTONEAREST);
+        IntPtr monitor = ResolveMonitor(settings.MonitorIndex);
         var mi = new NativeMethods.MONITORINFO { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<NativeMethods.MONITORINFO>() };
         if (!NativeMethods.GetMonitorInfo(monitor, ref mi)) return;
 
@@ -231,9 +295,26 @@ public partial class OverlayBar : Window
         if (barHeightPx <= 0) barHeightPx = (int)(64 * scale);
 
         int x = mi.rcWork.Left + (workWidthPx - barWidthPx) / 2;
-        int y = mi.rcWork.Bottom - barHeightPx;
+        int y = settings.IsBottomEdge ? mi.rcWork.Bottom - barHeightPx : mi.rcWork.Top;
 
         NativeMethods.SetWindowPos(_hwnd, NativeMethods.HWND_TOPMOST, x, y, barWidthPx, barHeightPx,
             NativeMethods.SWP_NOACTIVATE);
+    }
+
+    private IntPtr ResolveMonitor(int monitorIndex)
+    {
+        if (monitorIndex >= 0)
+        {
+            var screens = System.Windows.Forms.Screen.AllScreens;
+            if (monitorIndex < screens.Length)
+            {
+                var b = screens[monitorIndex].Bounds;
+                return NativeMethods.MonitorFromPoint(
+                    new NativeMethods.POINT { X = b.Left + b.Width / 2, Y = b.Top + b.Height / 2 },
+                    NativeMethods.MONITOR_DEFAULTTONEAREST);
+            }
+        }
+        IntPtr anchor = _explorerHwnd != IntPtr.Zero ? _explorerHwnd : _hwnd;
+        return NativeMethods.MonitorFromWindow(anchor, NativeMethods.MONITOR_DEFAULTTONEAREST);
     }
 }

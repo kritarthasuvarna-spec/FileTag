@@ -49,6 +49,24 @@ are never requested. Requires Windows 10 or 11; no other software needed
 | **Remove a note** | Edit it, delete all the text, save |
 | **Save while typing** | **Ctrl + Enter** (or the Save button) |
 | **Cancel while typing** | **Esc** (or the Discard button) |
+| **Change how FileTag looks/behaves** | Tray icon → **Settings…** |
+
+## Settings
+
+Right-click the tray icon → **Settings…**. Changes apply instantly — there is
+no Save button, exactly like Windows' own Settings app.
+
+- **Position** — dock the bar to the bottom or top of the screen; pin it to a
+  specific monitor or let it follow the active Explorer window.
+- **Appearance** — accent color (swatches or any hex value), with a live
+  preview right in the window.
+- **Behavior** — auto-hide delay (2–15 s) or "stay until dismissed"; slide
+  animation on/off.
+- **Hotkey** — remap the shortcut: click the box, press the new combination.
+  Conflicts with combos other apps already own are detected before accepting.
+- **Reset to Defaults** — one click, no questions asked.
+
+Settings live in `%APPDATA%\FileTag\settings.json`.
 
 Notes are capped at **500 characters** — a sticky note, not a document.
 Files without notes never show anything; the bar only appears when there is
@@ -118,6 +136,10 @@ silently.
 
 ## Version history
 
+- **3.0.0** — **Settings window** (live-apply, no Save button): screen edge,
+  monitor, accent color, auto-hide timing, animation toggle, and a fully
+  remappable hotkey with conflict detection. Clear failure toasts every time
+  a hotkey attempt or save can't proceed.
 - **2.0.0** — Notes now work on **every** drive and **sync across PCs**:
   automatic dual storage (ADS on local NTFS, hidden companion files in
   Google Drive/OneDrive folders and on FAT32/exFAT drives), internal version

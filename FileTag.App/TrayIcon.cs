@@ -11,13 +11,14 @@ internal sealed class TrayIcon : IDisposable
     private readonly NotifyIcon _icon;
     private string? _balloonUrl;
 
-    public TrayIcon(IndexStore index, Action onExit)
+    public TrayIcon(IndexStore index, Action onExit, Action onSettings)
     {
         string version = typeof(TrayIcon).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
 
         var menu = new ContextMenuStrip();
         menu.Items.Add(new ToolStripMenuItem($"FileTag v{version}") { Enabled = false });
         menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(new ToolStripMenuItem("Settings…", null, (_, _) => onSettings()));
 
         var startup = new ToolStripMenuItem("Start with Windows")
         {
@@ -38,7 +39,7 @@ internal sealed class TrayIcon : IDisposable
 
         _icon = new NotifyIcon
         {
-            Text = "FileTag — Shift+Alt+N to comment a file",
+            Text = "FileTag — " + FileTag.App.Settings.SettingsService.Instance.Current.HotkeyDisplay + " to comment a file",
             Icon = LoadIcon(),
             ContextMenuStrip = menu,
             Visible = true,

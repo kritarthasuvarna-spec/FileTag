@@ -9,6 +9,7 @@
     <Window.Resources>
         <SolidColorBrush x:Key="TextBrush" Color="#F2F2F7"/>
         <SolidColorBrush x:Key="DimBrush" Color="#9B9BA8"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#4F8EF7"/>
 
         <Style x:Key="BarButton" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
@@ -37,7 +38,7 @@
         </Style>
 
         <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource BarButton}">
-            <Setter Property="Background" Value="#4F8EF7"/>
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -47,7 +48,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#6BA1F8"/>
+                                <Setter TargetName="Bg" Property="Opacity" Value="0.8"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

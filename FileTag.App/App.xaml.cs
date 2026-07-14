@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using FileTag.App.Settings;
 using FileTag.Core;
 
 namespace FileTag.App;
@@ -15,9 +16,12 @@ public partial class App : System.Windows.Application
     private IndexStore _index = null!;
     private OverlayBar _bar = null!;
     private TrayIcon _tray = null!;
+    private ToastManager _toasts = null!;
     private HotkeyManager _hotkey = null!;
     private ExplorerWatcher _watcher = null!;
     private DispatcherTimer _debounce = null!;
+    private SettingsWindow? _settingsWindow;
+    private string _appliedHotkey = "";
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -28,17 +32,20 @@ public partial class App : System.Windows.Application
 
         _index = new IndexStore();
         InstallHelper.RegisterAll(_index.StartWithWindows);
+        SettingsService.Instance.Save(); // materialize defaults on first run
 
         _bar = new OverlayBar();
         _bar.SaveRequested += OnSaveRequested;
 
-        _tray = new TrayIcon(_index, ExitApp);
+        _tray = new TrayIcon(_index, ExitApp, OpenSettings);
+        _toasts = new ToastManager(_tray);
 
         _hotkey = new HotkeyManager();
         _hotkey.Pressed += OnHotkey;
+        ApplyHotkeyFromSettings(warnOnFailure: true);
         DebugLog.Write($"startup: hotkey registered={_hotkey.Registered}");
-        if (!_hotkey.Registered)
-            _tray.ShowBalloon("FileTag", "Shift+Alt+N is taken by another app — the hotkey won't work until that app releases it.");
+
+        SettingsService.Instance.SettingsChanged += () => ApplyHotkeyFromSettings(warnOnFailure: false);
 
         // Selection events arrive in bursts from any thread; collapse them into
         // one evaluation ~120ms after the burst ends.
@@ -49,11 +56,35 @@ public partial class App : System.Windows.Application
         if (!_index.FirstRunShown)
         {
             _tray.ShowBalloon("FileTag is running",
-                "Select a file and press Shift+Alt+N to add a comment.");
+                $"Select a file and press {SettingsService.Instance.Current.HotkeyDisplay} to add a comment.");
             _index.FirstRunShown = true;
         }
 
         _ = UpdateChecker.CheckAsync(_tray);
+
+        if (Environment.GetEnvironmentVariable("FILETAG_OPEN_SETTINGS") == "1")
+            OpenSettings(); // debug/test aid
+    }
+
+    private void ApplyHotkeyFromSettings(bool warnOnFailure)
+    {
+        var s = SettingsService.Instance.Current;
+        if (s.HotkeyDisplay == _appliedHotkey && _hotkey.Registered) return;
+        bool ok = _hotkey.Apply(s.HotkeyCtrl, s.HotkeyShift, s.HotkeyAlt, s.HotkeyKey);
+        if (ok) _appliedHotkey = s.HotkeyDisplay;
+        else if (warnOnFailure) _toasts.HotkeyConflict(s.HotkeyDisplay);
+    }
+
+    private void OpenSettings()
+    {
+        if (_settingsWindow is { IsLoaded: true })
+        {
+            _settingsWindow.Activate();
+            return;
+        }
+        _settingsWindow = new SettingsWindow(new SettingsViewModel(_hotkey.Probe));
+        _settingsWindow.Show();
+        _settingsWindow.Activate();
     }
 
     /// <summary>Decide what the bar should show for the current foreground Explorer selection.</summary>
@@ -115,9 +146,9 @@ public partial class App : System.Windows.Application
             else if (ShellSelection.IsDesktopClass(cls)) { sel = ShellSelection.GetDesktopSelectedPaths(); anchor = fg; }
             DebugLog.Write($"hotkey: sel=[{string.Join("; ", sel)}]");
 
-            if (sel.Count > 1) return;                          // multi-select is ambiguous → silent
-            if (sel.Count == 1 && !File.Exists(sel[0])) return; // folder/virtual item → silent
-            if (sel.Count == 1 && SidecarHelper.IsSidecar(sel[0])) return; // never comment a sidecar
+            if (sel.Count > 1) { _toasts.SelectSingleFile(); return; }        // multi-select is ambiguous
+            if (sel.Count == 1 && !File.Exists(sel[0])) { _toasts.SelectSingleFile(); return; } // folder/virtual item
+            if (sel.Count == 1 && SidecarHelper.IsSidecar(sel[0])) return;   // never comment a sidecar
 
             string? path = sel.Count == 1 ? sel[0] : null;
 
@@ -138,9 +169,17 @@ public partial class App : System.Windows.Application
 
             if (!File.Exists(path) || SidecarHelper.IsSidecar(path)) return;
 
+            // Existing comment that can't be parsed/read → warn, don't overwrite blindly.
+            var existing = StorageRouter.ReadLatest(path);
+            if (existing is null && StorageRouter.HasComment(path))
+            {
+                _toasts.DataDamaged();
+                return;
+            }
+
             // Any drive works now: NTFS gets an ADS stream, everything else
             // (FAT32 sticks, cloud-sync folders) gets a hidden sidecar file.
-            _bar.ShowEdit(path, StorageRouter.ReadLatest(path), anchor);
+            _bar.ShowEdit(path, existing, anchor);
         }
         catch (Exception ex) { DebugLog.Write("hotkey EX: " + ex); }
     }
@@ -176,7 +215,7 @@ public partial class App : System.Windows.Application
         }
         catch (Exception ex)
         {
-            _tray.ShowBalloon("FileTag — couldn't save", ex.Message);
+            _toasts.SaveFailed(ex.Message);
         }
     }
 
