@@ -1,9 +1,12 @@
+using FileTag.Core;
+
 namespace FileTag.App;
 
 /// <summary>
 /// Failure feedback (spec: "every time, not once"). All toasts here fire on
 /// every occurrence and only ever from an active hotkey attempt or a save —
 /// never from passive browsing, which would spam on every click.
+/// The toast disappears in seconds; the matching ERROR log line doesn't.
 /// </summary>
 internal sealed class ToastManager
 {
@@ -11,18 +14,24 @@ internal sealed class ToastManager
 
     public ToastManager(TrayIcon tray) => _tray = tray;
 
+    private void Toast(string text, string logDetail)
+    {
+        _tray.ShowBalloon("FileTag", text);
+        Logger.Error($"{text}{(logDetail.Length > 0 ? $" ({logDetail})" : "")}");
+    }
+
     public void SelectSingleFile() =>
-        _tray.ShowBalloon("FileTag", "Select a single file to add a comment");
+        Toast("Select a single file to add a comment", "hotkey with no/multiple/non-file selection");
 
     public void LocationUnsupported() =>
-        _tray.ShowBalloon("FileTag", "This location isn't supported yet");
+        Toast("This location isn't supported yet", "no available backend");
 
     public void SaveFailed(string reason) =>
-        _tray.ShowBalloon("FileTag", $"Couldn't save comment: {reason}");
+        Toast($"Couldn't save comment: {reason}", "save failure");
 
     public void DataDamaged() =>
-        _tray.ShowBalloon("FileTag", "Comment data looks damaged for this file");
+        Toast("Comment data looks damaged for this file", "unreadable comment data");
 
     public void HotkeyConflict(string combo) =>
-        _tray.ShowBalloon("FileTag", $"{combo} is taken by another app — change it in Settings.");
+        Toast($"{combo} is taken by another app — change it in Settings.", "hotkey registration failed");
 }

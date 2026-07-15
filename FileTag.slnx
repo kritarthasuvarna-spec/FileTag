@@ -2,5 +2,6 @@
   <Project Path="FileTag.App/FileTag.App.csproj" />
   <Project Path="FileTag.ConsoleTest/FileTag.ConsoleTest.csproj" />
   <Project Path="FileTag.Core/FileTag.Core.csproj" />
+  <Project Path="FileTag.Setup/FileTag.Setup.csproj" />
   <Project Path="FileTag.Uninstaller/FileTag.Uninstaller.csproj" />
 </Solution>

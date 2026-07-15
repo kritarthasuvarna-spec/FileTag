@@ -28,14 +28,17 @@ bottom of your screen.
 
 ## Install
 
-1. Download `FileTag-vX.Y.Z-win-x64.zip` and extract it to a permanent folder,
-   e.g. `C:\Users\<you>\AppData\Local\Programs\FileTag`.
-2. Run **`FileTag.App.exe`**.
+**Recommended:** download **`FileTag-Setup-vX.Y.Z.exe`** and run it — a short
+wizard (Welcome → Location → Options → Done) that installs per-user with no
+admin prompt.
 
-That's it. FileTag registers itself to start with Windows and appears in
-**Settings → Apps** for uninstalling. Everything is per-user — admin rights
-are never requested. Requires Windows 10 or 11; no other software needed
-(the .NET runtime is bundled).
+**Portable alternative:** download `FileTag-vX.Y.Z-win-x64.zip`, extract it to
+a permanent folder, and run **`FileTag.App.exe`** — it registers itself the
+same way.
+
+Either way FileTag appears in **Settings → Apps** for uninstalling, and can
+start with Windows. Requires Windows 10 or 11; nothing else needed (the .NET
+runtime is bundled).
 
 ## Using FileTag
 
@@ -116,11 +119,20 @@ folder, run `FileTag.App.exe` again. Notes and settings are unaffected.
 ## Uninstalling
 
 **Settings → Apps → FileTag → Uninstall** (or run `Uninstall.exe` from the
-install folder). The uninstaller removes the app **and strips every note it
-created** — both stream notes and companion files — your files are left
-exactly as FileTag found them, and nothing is left behind on your disk.
-Files that were moved or deleted since their note was written are skipped
-silently.
+install folder). A short wizard tells you exactly how many tagged files it
+will clean, shows live progress, and finishes with a summary. It removes the
+app **and strips every note it created** — both stream notes and companion
+files — your files are left exactly as FileTag found them, and nothing is
+left behind on your disk. Files that were moved or deleted since their note
+was written are skipped and logged, not treated as failures.
+
+## Logs
+
+Everything FileTag does is logged in plain text you can open in Notepad:
+tray icon → **Open logs folder** (or `%APPDATA%\FileTag\logs\`). The app log
+rolls daily and keeps about a week; the installer writes `install.log` there
+too. The uninstaller's log goes to `%TEMP%\FileTag-uninstall.log` (it can't
+live in a folder that's being deleted).
 
 ## Troubleshooting
 
@@ -136,6 +148,10 @@ silently.
 
 ## Version history
 
+- **4.0.0** — **Setup wizard** (`FileTag-Setup.exe`: Welcome / Location /
+  Options / real progress / Finish), **uninstall wizard** with live tagged-file
+  count and per-file progress, and a **shared logging system** across
+  install / app / uninstall with an "Open logs folder" tray shortcut.
 - **3.0.0** — **Settings window** (live-apply, no Save button): screen edge,
   monitor, accent color, auto-hide timing, animation toggle, and a fully
   remappable hotkey with conflict detection. Clear failure toasts every time

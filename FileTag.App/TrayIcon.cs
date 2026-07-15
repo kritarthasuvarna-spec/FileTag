@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using FileTag.Core;
 
@@ -19,6 +20,15 @@ internal sealed class TrayIcon : IDisposable
         menu.Items.Add(new ToolStripMenuItem($"FileTag v{version}") { Enabled = false });
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(new ToolStripMenuItem("Settings…", null, (_, _) => onSettings()));
+        menu.Items.Add(new ToolStripMenuItem("Open logs folder", null, (_, _) =>
+        {
+            try
+            {
+                Directory.CreateDirectory(FileTag.Core.Logger.LogsDirectory);
+                Process.Start(new ProcessStartInfo(FileTag.Core.Logger.LogsDirectory) { UseShellExecute = true });
+            }
+            catch { }
+        }));
 
         var startup = new ToolStripMenuItem("Start with Windows")
         {

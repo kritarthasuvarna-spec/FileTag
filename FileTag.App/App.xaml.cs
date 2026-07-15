@@ -27,8 +27,30 @@ public partial class App : System.Windows.Application
     {
         base.OnStartup(e);
 
+        // Uninstall mode: this exe hosts the uninstall wizard (launched by the
+        // Uninstall.exe stub) so the wizard UI costs no extra WPF payload.
+        if (e.Args.Any(a => a.Equals("--uninstall", StringComparison.OrdinalIgnoreCase)))
+        {
+            Logger.Init("Uninstall", Logger.UninstallLogPath);
+            UninstallRunner.KillOtherInstances();
+            if (e.Args.Any(a => a.Equals("/S", StringComparison.OrdinalIgnoreCase)))
+            {
+                var runner = new UninstallRunner();
+                runner.Run();
+                runner.ScheduleInstallFolderDeletion();
+                Shutdown(0);
+                return;
+            }
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
+            new UninstallWindow().Show();
+            return;
+        }
+
         _mutex = new Mutex(true, "FileTag.App.SingleInstance", out bool createdNew);
         if (!createdNew) { Shutdown(); return; }
+
+        Logger.Init("App");
+        Logger.Info($"FileTag {typeof(App).Assembly.GetName().Version?.ToString(3)} starting from {InstallHelper.ExePath}");
 
         _index = new IndexStore();
         InstallHelper.RegisterAll(_index.StartWithWindows);
@@ -44,6 +66,8 @@ public partial class App : System.Windows.Application
         _hotkey.Pressed += OnHotkey;
         ApplyHotkeyFromSettings(warnOnFailure: true);
         DebugLog.Write($"startup: hotkey registered={_hotkey.Registered}");
+        Logger.Info($"hotkey {SettingsService.Instance.Current.HotkeyDisplay} registered={_hotkey.Registered}");
+        Logger.Info($"cloud sync roots: {string.Join(" | ", CloudFolderDetector.GetRoots())}");
 
         SettingsService.Instance.SettingsChanged += () => ApplyHotkeyFromSettings(warnOnFailure: false);
 
@@ -205,11 +229,13 @@ public partial class App : System.Windows.Application
             if (string.IsNullOrWhiteSpace(text))
             {
                 _index.RemovePath(path);
+                Logger.Info($"comment removed: {path}");
                 _bar.CompleteSave(null);
             }
             else
             {
                 _index.AddPath(path);
+                Logger.Info($"comment saved ({StorageRouter.RouteFor(path).GetType().Name}): {path}");
                 _bar.CompleteSave(StorageRouter.ReadLatest(path));
             }
         }
@@ -221,6 +247,7 @@ public partial class App : System.Windows.Application
 
     private void ExitApp()
     {
+        Logger.Info("exit via tray menu");
         _watcher?.Dispose();
         _hotkey?.Dispose();
         _tray?.Dispose();
