@@ -17,6 +17,17 @@ internal static class InstallHelper
 
     public static string ExePath => Environment.ProcessPath ?? Process.GetCurrentProcess().MainModule!.FileName;
 
+    /// <summary>Install folder currently recorded in Apps &amp; Features, or null.</summary>
+    public static string? ReadRegisteredLocation()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(UninstallKeyPath);
+            return key?.GetValue("InstallLocation") as string;
+        }
+        catch { return null; }
+    }
+
     public static void RegisterAll(bool startWithWindows)
     {
         try

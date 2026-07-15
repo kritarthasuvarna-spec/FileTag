@@ -85,16 +85,24 @@ internal sealed class UninstallRunner
         Logger.Info($"uninstall summary — stripped: {Stripped}, skipped: {Skipped}");
     }
 
-    /// <summary>Deletes the install folder after this process exits.</summary>
+    /// <summary>Marker whose presence authorizes the scheduled folder deletion.
+    /// Launching or reinstalling FileTag into the folder removes it, which
+    /// cancels a still-pending deletion instead of letting it eat the new files.</summary>
+    public const string PendingDeletionSentinel = ".filetag-uninstall-pending";
+
+    /// <summary>Deletes the install folder after this process exits — but only
+    /// if the sentinel still exists at fire time (guards against a quick reinstall).</summary>
     public void ScheduleInstallFolderDeletion()
     {
         string installDir = AppContext.BaseDirectory.TrimEnd('\\');
         try
         {
+            string sentinel = Path.Combine(installDir, PendingDeletionSentinel);
+            File.WriteAllText(sentinel, DateTime.Now.ToString("o"));
             Process.Start(new ProcessStartInfo
             {
                 FileName = "cmd.exe",
-                Arguments = $"/c ping -n 3 127.0.0.1 >nul & rd /s /q \"{installDir}\"",
+                Arguments = $"/c ping -n 4 127.0.0.1 >nul & if exist \"{sentinel}\" rd /s /q \"{installDir}\"",
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 WorkingDirectory = Path.GetTempPath(),
@@ -102,6 +110,22 @@ internal sealed class UninstallRunner
             Logger.Info($"install folder deletion scheduled: {installDir}");
         }
         catch (Exception ex) { Logger.Error("folder deletion: " + ex.Message); }
+    }
+
+    /// <summary>Called at normal app startup: cancels a pending deletion of the
+    /// folder this app runs from (the user reinstalled or relaunched into it).</summary>
+    public static void CancelPendingDeletionHere()
+    {
+        try
+        {
+            string sentinel = Path.Combine(AppContext.BaseDirectory, PendingDeletionSentinel);
+            if (File.Exists(sentinel))
+            {
+                File.Delete(sentinel);
+                Logger.Warn("cancelled a pending uninstall deletion of this folder");
+            }
+        }
+        catch { }
     }
 
     /// <summary>Stops other running FileTag.App instances (not this one).</summary>

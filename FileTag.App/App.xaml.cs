@@ -51,8 +51,13 @@ public partial class App : System.Windows.Application
 
         Logger.Init("App");
         Logger.Info($"FileTag {typeof(App).Assembly.GetName().Version?.ToString(3)} starting from {InstallHelper.ExePath}");
+        UninstallRunner.CancelPendingDeletionHere();
 
         _index = new IndexStore();
+        // Detect a new/changed install location before re-registering over it,
+        // so the user gets visible feedback that "running the exe" worked.
+        string? previousLocation = InstallHelper.ReadRegisteredLocation();
+        string currentLocation = Path.GetDirectoryName(InstallHelper.ExePath)!;
         InstallHelper.RegisterAll(_index.StartWithWindows);
         SettingsService.Instance.Save(); // materialize defaults on first run
 
@@ -82,6 +87,13 @@ public partial class App : System.Windows.Application
             _tray.ShowBalloon("FileTag is running",
                 $"Select a file and press {SettingsService.Instance.Current.HotkeyDisplay} to add a comment.");
             _index.FirstRunShown = true;
+        }
+        else if (!string.Equals(previousLocation, currentLocation, StringComparison.OrdinalIgnoreCase))
+        {
+            // Not a first run, but the app moved (fresh extract, new folder):
+            // without this, launching the exe looks like "nothing happened".
+            _tray.ShowBalloon("FileTag is running",
+                $"Now installed at {currentLocation}. Look for the tag icon in the system tray.");
         }
 
         _ = UpdateChecker.CheckAsync(_tray);

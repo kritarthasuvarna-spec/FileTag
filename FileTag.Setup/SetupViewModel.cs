@@ -80,6 +80,9 @@ public sealed class SetupViewModel : INotifyPropertyChanged
         Directory.CreateDirectory(InstallDir);
         using var zip = new ZipArchive(payload, ZipArchiveMode.Read);
         zip.ExtractToDirectory(InstallDir, overwriteFiles: true);
+
+        // Installing over a just-uninstalled copy: cancel its pending folder deletion.
+        try { File.Delete(Path.Combine(InstallDir, ".filetag-uninstall-pending")); } catch { }
     }
 
     private void RegisterStartup()
