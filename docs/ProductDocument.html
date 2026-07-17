@@ -1,0 +1,643 @@
+<title>FileTag — Product Document</title>
+<style>
+  :root {
+    --accent: #4F8EF7;
+    --accent-ink: #2F6BD4;
+    --ink: #1B1D28;
+    --ink-2: #4A4E5E;
+    --muted: #6B7080;
+    --paper: #F7F8FB;
+    --card: #EDF0F6;
+    --line: #D8DCE6;
+    --code-bg: #E9EDF5;
+    --danger: #C24242;
+    --ok: #22A06B;
+    --warn: #B7791F;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent: #6BA1F8;
+      --accent-ink: #8FB8FA;
+      --ink: #ECEEF6;
+      --ink-2: #C3C7D4;
+      --muted: #8B90A0;
+      --paper: #17181F;
+      --card: #20222D;
+      --line: #32354363;
+      --code-bg: #232631;
+    }
+  }
+  :root[data-theme="dark"] {
+    --accent: #6BA1F8; --accent-ink: #8FB8FA; --ink: #ECEEF6; --ink-2: #C3C7D4;
+    --muted: #8B90A0; --paper: #17181F; --card: #20222D; --line: #32354363; --code-bg: #232631;
+  }
+  :root[data-theme="light"] {
+    --accent: #4F8EF7; --accent-ink: #2F6BD4; --ink: #1B1D28; --ink-2: #4A4E5E;
+    --muted: #6B7080; --paper: #F7F8FB; --card: #EDF0F6; --line: #D8DCE6; --code-bg: #E9EDF5;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+    font-size: 15.5px;
+    line-height: 1.65;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 48px;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 28px 96px;
+  }
+  @media (max-width: 940px) {
+    .shell { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    nav.toc { display: none; }
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 48px 0 32px;
+    font-size: 13px;
+  }
+  nav.toc .toc-title {
+    font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px; font-weight: 600;
+  }
+  nav.toc a {
+    display: block; color: var(--ink-2); text-decoration: none;
+    padding: 4px 10px; border-left: 2px solid var(--line);
+  }
+  nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent-ink); border-left-color: var(--accent); outline: none; }
+  nav.toc a.sub { padding-left: 22px; font-size: 12.5px; color: var(--muted); }
+
+  main { min-width: 0; padding-top: 48px; }
+
+  header.masthead { margin-bottom: 40px; }
+  .eyebrow {
+    font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
+    font-weight: 600; color: var(--accent-ink); margin-bottom: 10px;
+  }
+  h1 {
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+    font-size: 40px; font-weight: 650; line-height: 1.12; margin: 0 0 14px;
+    letter-spacing: -0.015em; text-wrap: balance;
+  }
+  .lede { font-size: 18px; color: var(--ink-2); max-width: 62ch; margin: 0 0 20px; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font-size: 12px; font-weight: 600; padding: 3px 11px; border-radius: 999px;
+    background: var(--card); color: var(--ink-2); border: 1px solid var(--line);
+  }
+  .chip.acc { background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+
+  section { margin-top: 56px; }
+  h2 {
+    font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+    font-size: 25px; font-weight: 650; letter-spacing: -0.01em;
+    margin: 0 0 6px; padding-top: 8px; text-wrap: balance;
+  }
+  h2 .no { color: var(--muted); font-weight: 400; margin-right: 10px; font-variant-numeric: tabular-nums; }
+  .h2-rule { height: 2px; width: 44px; background: var(--accent); border: 0; margin: 0 0 18px; }
+  h3 { font-size: 17px; font-weight: 650; margin: 28px 0 8px; }
+  h4 { font-size: 14.5px; font-weight: 650; margin: 20px 0 6px; }
+  p { max-width: 70ch; margin: 0 0 14px; }
+  ul, ol { max-width: 70ch; padding-left: 22px; margin: 0 0 14px; }
+  li { margin-bottom: 6px; }
+  li::marker { color: var(--accent-ink); }
+  strong { font-weight: 650; }
+
+  code, .path {
+    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    border-radius: 4px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+  pre.block {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 0 0 16px;
+  }
+  pre.block code { background: none; padding: 0; white-space: pre; }
+
+  .tablewrap { overflow-x: auto; margin: 0 0 16px; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th {
+    text-align: left; font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--muted); font-weight: 650; padding: 10px 14px;
+    border-bottom: 1px solid var(--line); background: var(--card);
+    white-space: nowrap;
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  td .path, td code { font-size: 12px; }
+
+  .callout {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 13px 17px;
+    margin: 0 0 16px;
+    max-width: 72ch;
+    font-size: 14px;
+  }
+  .callout.warn { border-left-color: var(--warn); }
+  .callout.danger { border-left-color: var(--danger); }
+  .callout .c-label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 650; color: var(--muted); margin-bottom: 4px; }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 0 0 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .card h4 { margin: 0 0 6px; }
+  .card p { font-size: 13.5px; color: var(--ink-2); margin: 0; max-width: none; }
+
+  .kbd {
+    font-family: "Cascadia Code", Consolas, ui-monospace, monospace;
+    font-size: 0.82em; font-weight: 600;
+    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px;
+    padding: 1px 7px; background: var(--card); white-space: nowrap;
+  }
+
+  .pill { font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .pill.ok   { background: color-mix(in srgb, var(--ok) 15%, transparent);   color: var(--ok); }
+  .pill.no   { background: color-mix(in srgb, var(--danger) 13%, transparent); color: var(--danger); }
+  .pill.def  { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent-ink); }
+
+  pre.mermaid { background: transparent; display: flex; justify-content: flex-start; overflow-x: auto; margin: 0 0 16px; }
+
+  .verhist { border-left: 2px solid var(--line); padding-left: 22px; max-width: 70ch; }
+  .ver { position: relative; margin-bottom: 22px; }
+  .ver::before {
+    content: ""; position: absolute; left: -27.5px; top: 7px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent); border: 2px solid var(--paper);
+  }
+  .ver .v { font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 8px; }
+  .ver .d { font-size: 12px; color: var(--muted); }
+  .ver p { margin: 4px 0 0; font-size: 14px; color: var(--ink-2); }
+
+  footer.doc-footer {
+    margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 24px;
+  }
+  a { color: var(--accent-ink); }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+</style>
+
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <div class="toc-title">Contents</div>
+  <a href="#overview">1 · Product overview</a>
+  <a href="#interaction">2 · The core interaction</a>
+  <a href="#features">3 · Feature reference</a>
+  <a class="sub" href="#hotkey-chain">Hotkey resolution chain</a>
+  <a class="sub" href="#settings">Settings</a>
+  <a class="sub" href="#toasts">Failure feedback</a>
+  <a href="#storage">4 · Storage architecture</a>
+  <a class="sub" href="#routing">Routing rules</a>
+  <a class="sub" href="#format">Data format</a>
+  <a class="sub" href="#cloud">Cloud detection</a>
+  <a href="#system">5 · System architecture</a>
+  <a href="#install">6 · Install &amp; distribution</a>
+  <a class="sub" href="#uninstall">Uninstall</a>
+  <a href="#footprint">7 · Disk &amp; registry footprint</a>
+  <a href="#security">8 · Security &amp; privacy</a>
+  <a href="#requirements">9 · Requirements</a>
+  <a href="#limitations">10 · Known limitations</a>
+  <a href="#quality">11 · Quality &amp; verification</a>
+  <a href="#history">12 · Version history</a>
+  <a href="#roadmap">13 · Roadmap</a>
+  <a href="#faq">14 · Troubleshooting</a>
+</nav>
+
+<main>
+<header class="masthead">
+  <div class="eyebrow">Product Document · v4.0.0 · July 2026</div>
+  <h1>🏷 FileTag</h1>
+  <p class="lede">Attach a personal note to any file on your PC — stored invisibly with the file itself, carried through renames and moves, and synced across machines when the file lives in a Google&nbsp;Drive or OneDrive folder.</p>
+  <div class="meta-row">
+    <span class="chip acc">Windows 10 / 11</span>
+    <span class="chip">C# · .NET 8 · WPF</span>
+    <span class="chip">No database</span>
+    <span class="chip">No admin rights</span>
+    <span class="chip">No cloud APIs</span>
+    <span class="chip">$0 to build &amp; ship</span>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<section id="overview">
+  <h2><span class="no">1</span>Product overview</h2>
+  <hr class="h2-rule">
+  <p>Every file system remembers <em>what</em> a file is — none remembers <em>why you kept it</em>. FileTag answers that question in place: select a file, press a hotkey, type a note. Click the file weeks later and the note slides up from the edge of the screen. There is no app window to open, no database to maintain, and nothing for other programs to trip over.</p>
+
+  <h3>Design principles</h3>
+  <div class="grid2">
+    <div class="card"><h4>The note lives with the file</h4><p>Notes are stored in the file's own NTFS alternate data stream, or in a hidden companion file where streams can't survive. No central store means no orphaned records and no re-linking logic — a rename or move simply carries the note along.</p></div>
+    <div class="card"><h4>Invisible until it has something to say</h4><p>Files without notes never trigger anything. The overlay bar appears only when a selected file actually has a note, and the hotkey is the only way a first note gets created.</p></div>
+    <div class="card"><h4>The file is never touched</h4><p>Content, size as apps see it, and the modified timestamp are all preserved — FileTag captures and restores file times around every stream write. Every application opens the file exactly as before.</p></div>
+    <div class="card"><h4>Leaves nothing behind</h4><p>Uninstall strips every note FileTag ever created, from both storage backends, and removes all registry entries and local data. No orphaned hidden data with no app left to manage it.</p></div>
+    <div class="card"><h4>Cross-device by riding existing sync</h4><p>Inside Google Drive Desktop or OneDrive folders, notes are written as small hidden files the sync engine uploads like anything else — so a note tagged on PC A appears on PC B. No accounts, no provider APIs, no internet dependency.</p></div>
+    <div class="card"><h4>Nothing is silently overwritten</h4><p>Both backends store a capped 20-entry version history rather than a single string. Sync conflicts and accidental edits are recoverable, not lossy.</p></div>
+  </div>
+
+  <h3>What FileTag deliberately is not</h3>
+  <ul>
+    <li><strong>Not a shell extension.</strong> No COM registration, no context-menu handler, no icon overlays — the historically fragile approach was rejected at design time. Detection is done with UI Automation from a normal user process.</li>
+    <li><strong>Not a tagging database.</strong> The local index is a lookup cache only — rebuildable, never the source of truth.</li>
+    <li><strong>Not a cloud service.</strong> The only network call the app ever makes is an optional version check against GitHub Releases.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="interaction">
+  <h2><span class="no">2</span>The core interaction</h2>
+  <hr class="h2-rule">
+  <p>Two paths, one UI — everything routes through the bottom (or top) overlay bar:</p>
+  <ol>
+    <li><strong>Passive display.</strong> Click a file in Explorer or on the desktop. If it has a note, the bar slides in showing it — read-only, with <em>Edit</em> and <em>✕</em> buttons and the last-edited timestamp. No note → nothing happens, silently.</li>
+    <li><strong>Active add / edit.</strong> Press <span class="kbd">Shift+Alt+N</span> (default; remappable) with a file selected. The bar opens in edit mode: pre-filled if a note exists, cursor at the end, live character counter capped at 500 (turns red near the limit), <em>Save</em> / <em>Discard</em>, <span class="kbd">Esc</span> to discard, <span class="kbd">Ctrl+Enter</span> to save. Saving empty text removes the note.</li>
+  </ol>
+
+  <h3>The overlay bar</h3>
+  <div class="tablewrap"><table>
+    <tr><th>State</th><th>When</th><th>Behavior</th></tr>
+    <tr><td><strong>Hidden</strong> <span class="pill def">default</span></td><td>No selection, multi-selection, or file without a note</td><td>Completely absent — no dock space consumed</td></tr>
+    <tr><td><strong>Read</strong></td><td>Single commented file selected</td><td>Note text, filename, timestamp, Edit / ✕. Never steals keyboard focus (<code>WS_EX_NOACTIVATE</code>). Auto-hides after a configurable 2–15&nbsp;s (or stays until dismissed); hovering postpones the hide</td></tr>
+    <tr><td><strong>Edit</strong></td><td>Hotkey, or Edit clicked</td><td>Takes focus deliberately — with an <code>AttachThreadInput</code> fallback so even stubborn fullscreen apps can't block it. Never auto-hides mid-edit, and selection changes never yank an edit in progress</td></tr>
+  </table></div>
+  <ul>
+    <li>Slides in/out with a ~150&nbsp;ms eased animation (can be turned off).</li>
+    <li>Docks to the bottom or top work-area edge of the monitor hosting the active Explorer window — or a manually pinned monitor — positioned in raw pixels so per-monitor DPI can't skew it.</li>
+    <li>Tracks the <strong>active Explorer tab</strong> on Windows 11: each tab's shell view is resolved through <code>IShellBrowser</code> and only the visible one is queried, so tab switches behave like window switches.</li>
+    <li>The storage backend in use (stream vs. companion file) is completely invisible — the bar behaves identically either way.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="features">
+  <h2><span class="no">3</span>Feature reference</h2>
+  <hr class="h2-rule">
+
+  <h3 id="hotkey-chain">Hotkey resolution chain — never a dead key</h3>
+  <p>When the hotkey fires, FileTag resolves "which file do you mean?" through a strict fallback chain, so the shortcut always does something useful from anywhere in Windows:</p>
+  <div class="tablewrap"><table>
+    <tr><th>#</th><th>Source</th><th>Detail</th></tr>
+    <tr><td>1</td><td><strong>Explorer selection</strong></td><td>The single selected file in the foreground Explorer window (active tab on Win11), resolved via Shell automation</td></tr>
+    <tr><td>2</td><td><strong>Desktop selection</strong></td><td>The selected desktop icon, resolved through the desktop's shell view (<code>IShellWindows.FindWindowSW</code>) — works even with OneDrive-redirected desktops</td></tr>
+    <tr><td>3</td><td><strong>Clipboard file</strong></td><td>If nothing is selected anywhere but exactly one file was copied (Ctrl+C), that file is used — making "copy anywhere → hotkey" a universal gesture</td></tr>
+    <tr><td>4</td><td><strong>File picker</strong></td><td>Last resort: a standard open-file dialog titled "FileTag — choose a file to comment"</td></tr>
+  </table></div>
+  <p>Multi-selection and folders are deliberately ambiguous → a toast, not a guess. FileTag's own companion files (<code>.filetag</code>) can never themselves be commented or surfaced.</p>
+
+  <h3 id="settings">Settings — live-apply, no Save button</h3>
+  <p>Tray icon → <strong>Settings…</strong>. Modeled on Windows' own Settings app: every change applies on the spot (bar repositions, accent recolors, hotkey re-registers) with disk writes debounced ~300&nbsp;ms. The window is sectioned, includes a live preview pane rendering a mock bar with current values, and always offers <strong>Reset to Defaults</strong>.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Section</th><th>Setting</th><th>Range / type</th><th>Default</th></tr>
+    <tr><td>Position</td><td>Screen edge</td><td>Top / Bottom</td><td>Bottom</td></tr>
+    <tr><td>Position</td><td>Target monitor</td><td>Auto (follow Explorer) / manual pick</td><td>Auto</td></tr>
+    <tr><td>Appearance</td><td>Accent color</td><td>Swatches + any hex value, live preview</td><td><code>#4F8EF7</code></td></tr>
+    <tr><td>Behavior</td><td>Auto-hide timing</td><td>Slider 2–15 s, or "Stay until dismissed"</td><td>7 s</td></tr>
+    <tr><td>Behavior</td><td>Slide animation</td><td>On / off</td><td>On</td></tr>
+    <tr><td>Hotkey</td><td>Add/edit shortcut</td><td>Click the box, press a combo — letters, digits, F-keys with ≥1 modifier. Conflicts are probed with a real <code>RegisterHotKey</code> attempt before accepting</td><td>Shift+Alt+N</td></tr>
+  </table></div>
+  <p>Stored at <span class="path">%APPDATA%\FileTag\settings.json</span> with a <code>schemaVersion</code> field so future fields can migrate instead of resetting.</p>
+
+  <h3 id="toasts">Failure feedback — every time, not once</h3>
+  <p>Failures toast on every occurrence (unlike the one-time first-run balloon), but only from an <em>active</em> hotkey attempt or a save — passive browsing never toasts, so scrolling a folder of unsupported files stays silent. Every failure toast also writes a matching <code>ERROR</code> line to the log: the toast disappears in seconds, the log line doesn't.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Trigger</th><th>Toast</th></tr>
+    <tr><td>Hotkey with multi-selection or a folder selected</td><td>"Select a single file to add a comment"</td></tr>
+    <tr><td>No storable backend for the location</td><td>"This location isn't supported yet"</td></tr>
+    <tr><td>Save fails (locked, read-only, permissions, disk full)</td><td>"Couldn't save comment: [reason]"</td></tr>
+    <tr><td>Existing note unreadable — editor refuses to open over it</td><td>"Comment data looks damaged for this file"</td></tr>
+    <tr><td>Hotkey combo already owned by another app</td><td>"[combo] is taken by another app — change it in Settings."</td></tr>
+  </table></div>
+
+  <h3>Everything else</h3>
+  <ul>
+    <li><strong>Tray icon</strong> — the app's only always-visible surface: Settings…, Open logs folder, Start with Windows toggle, Check for updates, Exit.</li>
+    <li><strong>First run</strong> — one balloon, shown once ever: "FileTag is running. Select a file and press [hotkey] to add a comment."</li>
+    <li><strong>Relocation notice</strong> — launching the exe from a new folder shows "FileTag is running — now installed at …", so a portable launch never looks like a no-op.</li>
+    <li><strong>Update check</strong> — on launch, a background query of the GitHub latest-release tag; a newer version produces one quiet balloon linking to the download page. Never auto-installs, never nags, fails silently offline.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="storage">
+  <h2><span class="no">4</span>Storage architecture</h2>
+  <hr class="h2-rule">
+  <p>Notes are stored through one of two interchangeable backends behind a single <code>ICommentStore</code> interface, chosen automatically per file. Nothing above the router knows or cares which backend owns a file.</p>
+
+  <div class="grid2">
+    <div class="card"><h4>AdsStore — local NTFS drives</h4><p>The note lives <em>inside</em> the file as a named alternate data stream: <code>report.xlsx:FileTag.txt</code>. Invisible, zero extra files, and renames/moves within NTFS carry it automatically. File timestamps are captured and restored around every write so the file looks untouched.</p></div>
+    <div class="card"><h4>SidecarStore — cloud folders &amp; non-NTFS</h4><p>The note lives in a small hidden companion file: <code>report.xlsx.filetag</code>, same folder. Used where streams don't exist (FAT32/exFAT) or wouldn't survive (cloud sync uploads strip ADS — a plain hidden file uploads fine, which is what makes notes appear on a second PC).</p></div>
+  </div>
+
+  <h3 id="routing">Routing rules</h3>
+  <pre class="mermaid">
+flowchart TD
+    A["File path"] --> B{"Inside a known cloud-sync folder?<br/>(Google Drive / OneDrive)"}
+    B -- "Yes" --> S["SidecarStore<br/>survives sync, shows up cross-device"]
+    B -- "No" --> C{"Drive is NTFS?"}
+    C -- "Yes" --> D["AdsStore<br/>invisible, zero extra files"]
+    C -- "No (FAT32 / exFAT)" --> S
+  </pre>
+  <p><strong>Reads are resilient to moved files:</strong> the routed backend is tried first, then the other — so a file dragged from a local folder into OneDrive with its stream still attached remains readable. <strong>Saving migrates:</strong> the note is written to the correct backend for where the file lives now and the stale copy is removed, history intact. <strong>Delete cleans both backends</strong>, including orphaned companion files whose original moved away.</p>
+
+  <h3 id="format">Data format — versioned, both backends identical</h3>
+  <pre class="block"><code>{
+  "history": [
+    { "text": "Draft — needs review",                     "at": "2026-07-10T09:12:00Z" },
+    { "text": "Final version sent to client on June 12.", "at": "2026-07-14T11:50:00Z" }
+  ]
+}</code></pre>
+  <ul>
+    <li>Capped at <strong>20 entries</strong>, oldest dropped first. The UI shows and edits only the latest entry; the format is ready for a "view history" feature with no storage migration.</li>
+    <li>Sync conflicts (same file's note edited offline on two PCs) become two recoverable histories, not silent data loss.</li>
+    <li><strong>Backward compatible reads:</strong> legacy v1 single-note JSON and even hand-written plain-text streams parse as a one-entry history and upgrade to the current format on next save.</li>
+    <li>Notes are capped at 500 characters — a sticky note, not a document.</li>
+  </ul>
+
+  <h3 id="cloud">Cloud-sync folder detection</h3>
+  <p>Purely local — no API calls, no accounts, no internet. Detected at startup and refreshed lazily every 15 minutes, never on the hot path of a file click.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Provider</th><th>Detection sources</th></tr>
+    <tr><td>OneDrive</td><td>Every account under <span class="path">HKCU\Software\Microsoft\OneDrive\Accounts\*</span> (<code>UserFolder</code> value — Personal, Business1, Business2… never hardcoded), plus the <code>OneDrive</code> / <code>OneDriveConsumer</code> / <code>OneDriveCommercial</code> environment variables</td></tr>
+    <tr><td>Google Drive Desktop</td><td>Mount points parsed from DriveFS preferences in <span class="path">HKCU\Software\Google\DriveFS</span>, plus a volume-label fallback that finds mounted "Google Drive" drives (streaming or mirror mode)</td></tr>
+  </table></div>
+
+  <h3>The local index — cache, never truth</h3>
+  <p><span class="path">%LOCALAPPDATA%\FileTag\index.json</span> tracks which paths currently carry a note, so future features (search, export, bulk manage) never need a full-drive rescan. It stores <em>paths only, never note text</em>, is fully rebuildable, and can go stale but never wrong — note text always lives in whichever backend owns the file. Its one load-bearing job today: telling the uninstaller which files to clean.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="system">
+  <h2><span class="no">5</span>System architecture</h2>
+  <hr class="h2-rule">
+  <pre class="mermaid">
+flowchart LR
+    subgraph OS["Windows"]
+      EX["Explorer windows,<br/>tabs &amp; desktop"]
+      REG["HKCU registry"]
+    end
+    subgraph APP["FileTag.App (tray process)"]
+      EW["ExplorerWatcher<br/>UI Automation events +<br/>foreground WinEvent hook"]
+      HK["HotkeyManager<br/>RegisterHotKey, remappable"]
+      CO["App coordinator<br/>debounced evaluate"]
+      OB["OverlayBar<br/>hidden / read / edit"]
+      SET["Settings system<br/>live-apply MVVM"]
+      TR["TrayIcon + ToastManager"]
+      UW["Uninstall wizard<br/>(--uninstall mode)"]
+    end
+    subgraph CORE["FileTag.Core"]
+      SR["StorageRouter"]
+      ADS["AdsHelper<br/>NTFS streams"]
+      SC["SidecarHelper<br/>.filetag files"]
+      CFD["CloudFolderDetector"]
+      IX["IndexStore"]
+      LG["Logger"]
+    end
+    EX -- "selection changed" --> EW
+    EW --> CO
+    HK --> CO
+    CO --> OB
+    CO --> SR
+    SET --> OB
+    SET --> HK
+    SR --> ADS
+    SR --> SC
+    SR --> CFD
+    CO --> IX
+    APP --> LG
+    TR --> SET
+    UW --> SR
+    APP --> REG
+  </pre>
+
+  <h3>Detection: UI Automation, kept cheap</h3>
+  <ul>
+    <li>Selection events are subscribed once at the UIA root (from a background MTA thread), so new Explorer windows and Win11 tabs are covered automatically — nothing to re-attach per window.</li>
+    <li>Events fire system-wide on every selection anywhere, so the handler early-exits on process id (explorer.exe only) before doing anything else. A foreground-window WinEvent hook catches window/tab switches and closes.</li>
+    <li>Bursts collapse into one evaluation ~120 ms after the burst ends; the existence check (<code>File.Exists</code> on the stream or sidecar path) gates whether the bar shows at all.</li>
+    <li>Full file paths come from Shell automation (<code>Shell.Application</code> in-process — this is not a shell extension and registers nothing), with active-tab resolution via each view's <code>IShellBrowser</code> window handle.</li>
+  </ul>
+
+  <h3>Logging</h3>
+  <p>One shared <code>Logger</code> in Core, used by Setup, the app, and Uninstall alike — plain text that opens in Notepad, format <code>timestamp | LEVEL | component | message</code>, levels <code>INFO</code> / <code>WARN</code> / <code>ERROR</code>. The app log rolls daily (or at 5&nbsp;MB) and keeps ~7 days. Tray → <strong>Open logs folder</strong> jumps straight there. Logging can never throw into the code it observes.</p>
+
+  <h3>Solution layout</h3>
+  <pre class="block"><code>FileTag.Core/          storage layer + shared services (no UI)
+  ICommentStore.cs     shared interface: HasComment / Read / Write / Delete
+  AdsHelper.cs         ADS backend          SidecarHelper.cs   sidecar backend
+  StorageRouter.cs     routing + facade     CloudFolderDetector.cs
+  Note.cs              model + history      NoteFormat.cs      3-format parser
+  IndexStore.cs        path cache           Logger.cs          shared logging
+
+FileTag.App/           WPF tray app
+  App.xaml.cs          coordinator          ExplorerWatcher.cs
+  OverlayBar.xaml      the bar              HotkeyManager.cs
+  TrayIcon.cs          ToastManager.cs      ShellSelection.cs
+  UninstallWindow.xaml + UninstallRunner.cs (--uninstall mode)
+  Settings/            AppSettings · SettingsService · ViewModel · Window
+
+FileTag.Setup/         WPF install wizard (payload zip embedded at build)
+FileTag.Uninstaller/   12 MB stub → launches FileTag.App --uninstall
+FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre>
+</section>
+
+<!-- ============================================================ -->
+<section id="install">
+  <h2><span class="no">6</span>Install &amp; distribution</h2>
+  <hr class="h2-rule">
+  <p>Distributed free via GitHub Releases in two forms. Everything is per-user: no admin prompt, ever.</p>
+
+  <h3>FileTag-Setup.exe — the recommended path</h3>
+  <p>A small custom WPF installer in the app's own design language, not an off-the-shelf wizard. Five screens: <strong>Welcome → Install location</strong> (default <span class="path">%LOCALAPPDATA%\FileTag</span>, Browse to change) <strong>→ Options</strong> (launch on startup ✓, launch after install ✓) <strong>→ Progress → Finish</strong> (with an "Open Settings" button). Progress shows four <em>real</em> steps, each reported only when its work actually completed and each logged to <code>install.log</code>: copying files → registering startup → detecting cloud folders → writing the Apps&nbsp;&amp;&nbsp;Features entry.</p>
+
+  <h3>Portable zip</h3>
+  <p>Extract anywhere, run <code>FileTag.App.exe</code>. The app self-registers on every launch — startup entry (honoring the user's toggle) and the Apps&nbsp;&amp;&nbsp;Features entry — and re-points both automatically if the folder moves. Zip and Setup produce identical registration.</p>
+
+  <h3>Updates</h3>
+  <p>No store means no auto-update: the app quietly checks the GitHub latest-release tag at launch and shows one balloon if newer. Updating is: exit → extract new zip over the folder (or run the new Setup) → done. Notes and settings are unaffected by updates.</p>
+
+  <h3 id="uninstall">Uninstall — a wizard, never silent</h3>
+  <p>Uninstall is destructive by deliberate decision — it strips every note FileTag created — so it is never one-click. <em>Confirm</em> states the real number: "delete comments from N tagged files", pulled live from the index. <em>Progress</em> counts through "Removing comment 14 of 42…". <em>Finish</em> summarizes removed vs. skipped with a link to the log.</p>
+  <ol>
+    <li>Strip every indexed note via its backend — stream or sidecar; the files themselves untouched. Moved/deleted files are skipped and logged, not failures. Orphaned sidecars are cleaned even when the original file is gone.</li>
+    <li>Stop the running tray process.</li>
+    <li>Remove the startup entry and the Apps &amp; Features key.</li>
+    <li>Delete local data (index, settings, logs).</li>
+    <li>Delete the install folder — scheduled to run after the process exits, since the uninstaller lives inside it. The uninstall log is written to <span class="path">%TEMP%</span>, never the install folder: a log inside the folder being deleted would erase its own record.</li>
+  </ol>
+  <div class="callout">
+    <div class="c-label">Engineering note — reinstall race guard</div>
+    The scheduled folder deletion is authorized by a sentinel file. Launching FileTag — or running Setup — into that folder removes the sentinel, cancelling a still-pending deletion instead of letting it eat the freshly installed files. A normal uninstall with no reinstall still cleans up completely.
+  </div>
+  <div class="callout">
+    <div class="c-label">Engineering note — wizard without the weight</div>
+    <code>Uninstall.exe</code> (what Apps &amp; Features invokes) is a 12&nbsp;MB stub that launches <code>FileTag.App.exe --uninstall</code>, which hosts the wizard UI. A standalone WPF uninstaller would have shipped a second ~80&nbsp;MB runtime for three screens.
+  </div>
+
+  <h3>Release artifacts</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Artifact</th><th>Size</th><th>Purpose</th></tr>
+    <tr><td><code>FileTag-Setup-vX.Y.Z.exe</code></td><td>~137 MB</td><td>Wizard installer, payload embedded, self-contained</td></tr>
+    <tr><td><code>FileTag-vX.Y.Z-win-x64.zip</code></td><td>~68 MB</td><td>Portable: app + Uninstall.exe + README</td></tr>
+  </table></div>
+  <p>Binaries are unsigned (the $0 constraint), so SmartScreen shows "unrecognized app" on first run — <em>More info → Run anyway</em>. Old release artifacts and git tags are preserved on every version bump.</p>
+</section>
+
+<!-- ============================================================ -->
+<section id="footprint">
+  <h2><span class="no">7</span>Disk &amp; registry footprint</h2>
+  <hr class="h2-rule">
+  <div class="tablewrap"><table>
+    <tr><th>Location</th><th>What</th><th>Removed on uninstall</th></tr>
+    <tr><td><span class="path">&lt;install dir&gt;</span></td><td>FileTag.App.exe · Uninstall.exe · README.md</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">&lt;file&gt;:FileTag.txt</span></td><td>Note stream on NTFS files</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">&lt;file&gt;.filetag</span></td><td>Hidden companion note file (cloud / non-NTFS)</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%LOCALAPPDATA%\FileTag\index.json</span></td><td>Path index (cache)</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%APPDATA%\FileTag\settings.json</span></td><td>Settings (schema-versioned)</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%APPDATA%\FileTag\logs\</span></td><td>filetag.log (rolling ~7 days) · install.log</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%TEMP%\FileTag-uninstall.log</span></td><td>Uninstall record</td><td><span class="pill no">KEPT</span> (by design)</td></tr>
+    <tr><td><span class="path">HKCU\…\CurrentVersion\Run → FileTag</span></td><td>Start-with-Windows entry</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">HKCU\…\CurrentVersion\Uninstall\FileTag</span></td><td>Apps &amp; Features entry (DisplayName, DisplayVersion, Publisher, InstallLocation, UninstallString, NoModify=1, NoRepair=1, EstimatedSize)</td><td><span class="pill ok">YES</span></td></tr>
+  </table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="security">
+  <h2><span class="no">8</span>Security &amp; privacy</h2>
+  <hr class="h2-rule">
+  <ul>
+    <li><strong>Runs entirely as the user.</strong> <code>asInvoker</code> manifest; no elevation path exists anywhere in install, use, or uninstall.</li>
+    <li><strong>One outbound call, ever:</strong> the optional update check to the GitHub Releases API. No telemetry, no accounts, no cloud-provider APIs. Cloud-folder detection reads local env vars and HKCU registry only.</li>
+    <li><strong>Note text never leaves the file's location.</strong> The index stores paths only; logs record paths and events, not note contents.</li>
+    <li><strong>ADS heuristics tested up front.</strong> Because alternate data streams have a malware history, some AV/EDR tools flag writers heuristically. This was treated as a launch risk and tested first: stream writes and all shipped binaries scan clean under Windows Defender.</li>
+    <li><strong>Unsigned binaries</strong> (the $0 constraint) — the one real trust friction; SmartScreen warns on first run of a downloaded copy.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="requirements">
+  <h2><span class="no">9</span>Requirements</h2>
+  <hr class="h2-rule">
+  <div class="tablewrap"><table>
+    <tr><th>Requirement</th><th>Detail</th></tr>
+    <tr><td>OS</td><td>Windows 10 or 11, x64</td></tr>
+    <tr><td>Prerequisites</td><td>None — the .NET 8 runtime is bundled (self-contained single-file)</td></tr>
+    <tr><td>Rights</td><td>Standard user; per-user install</td></tr>
+    <tr><td>Disk</td><td>~170 MB installed; each note costs bytes</td></tr>
+    <tr><td>Memory</td><td>Tray-resident WPF process, a few tens of MB</td></tr>
+    <tr><td>Full note durability</td><td>NTFS volumes (internal drives virtually always are); other drives and cloud folders use companion files</td></tr>
+  </table></div>
+</section>
+
+<!-- ============================================================ -->
+<section id="limitations">
+  <h2><span class="no">10</span>Known limitations</h2>
+  <hr class="h2-rule">
+  <p>Accepted at design time — documented rather than over-engineered around:</p>
+  <ul>
+    <li><strong>Sending a file elsewhere strips the note</strong> — email attachment, upload to an untracked web service, non-supported sync products. By design, not a bug to chase.</li>
+    <li><strong>True cloud-only files</strong> (never synced locally, web-only) aren't reachable — sidecar storage requires a local synced folder to exist.</li>
+    <li><strong>Renaming a file in a cloud/USB folder orphans its companion note.</strong> ADS follows renames; a sidecar can't. The note isn't lost — it's still there under the old name — but won't display until re-linked manually.</li>
+    <li><strong>Sync conflicts aren't auto-merged.</strong> Editing the same file's note offline on two PCs produces two histories that need a manual merge — recoverable thanks to versioning, but not automatic.</li>
+    <li><strong>Shift+Alt is also Windows' input-language switcher</strong> when multiple keyboard languages are installed — the default hotkey can flip input language as a side effect. Remap in Settings if it bites.</li>
+    <li><strong>OneDrive "free up space" re-downloads</strong> replace the local copy — an ADS note on a file that predates its cloud folder membership doesn't survive that; sidecar-stored notes do.</li>
+    <li><strong>Windows only.</strong> No macOS/Linux; both the storage layer and the detection layer are Windows-specific by nature.</li>
+    <li><strong>No icon overlay badge</strong> — part of the rejected shell-extension approach.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="quality">
+  <h2><span class="no">11</span>Quality &amp; verification</h2>
+  <hr class="h2-rule">
+  <ul>
+    <li><strong>Storage suite: 42 automated checks</strong> covering both backends — write/read/delete, rename &amp; move survival, host-file timestamp preservation, history capping and ordering, the 500-char cap, legacy-format parsing and upgrade, hidden-sidecar overwrite, ADS→sidecar migration with history intact, orphaned-sidecar cleanup, and index round-trips. Plus a live-probe mode (<code>FileTag.ConsoleTest &lt;path&gt; [text]</code>) that reports routing and saves against real files.</li>
+    <li><strong>Live end-to-end verification on a real machine:</strong> passive display and hotkey editing driven through actual Explorer windows and the actual desktop; clipboard and picker fallbacks; settings changes (edge, accent, auto-hide, hotkey remap) confirmed visually taking effect; sidecar notes created through the UI inside a real Google Drive mount.</li>
+    <li><strong>Full lifecycle tested:</strong> Setup wizard (silent and interactive) → use → uninstall wizard, with registry, files, logs, and stripped notes verified at each stage — including the uninstall-then-quick-reinstall race.</li>
+    <li><strong>Defender scans clean</strong> on ADS writes, the app, the zip, and the Setup exe.</li>
+    <li>Cross-device sync verification (tag on PC A, see it on PC B) requires a second machine and is the one spec test outstanding.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ -->
+<section id="history">
+  <h2><span class="no">12</span>Version history</h2>
+  <hr class="h2-rule">
+  <div class="verhist">
+    <div class="ver"><span class="v">4.0.0</span><span class="d">July 2026 · current</span>
+      <p>Setup wizard with embedded payload and real logged steps · uninstall wizard with live tagged-file count and per-file progress · shared logging system across install/app/uninstall with tray shortcut · reinstall race guard · relocation balloon.</p></div>
+    <div class="ver"><span class="v">3.0.0</span><span class="d">July 2026</span>
+      <p>Live-apply Settings window (edge, monitor, accent, auto-hide, animation, remappable hotkey with conflict probe) · recurring failure toasts.</p></div>
+    <div class="ver"><span class="v">2.0.0</span><span class="d">July 2026</span>
+      <p>Dual storage behind ICommentStore: sidecar backend, cloud-folder routing, cross-PC sync · versioned 20-entry note history · seamless migration of v1 notes.</p></div>
+    <div class="ver"><span class="v">1.1.0</span><span class="d">July 2026</span>
+      <p>Hotkey changed to Shift+Alt+N · works everywhere: desktop icons, clipboard files, picker fallback · foreground-lock focus fix.</p></div>
+    <div class="ver"><span class="v">1.0.0</span><span class="d">July 2026</span>
+      <p>First release: overlay bar, ADS storage, Explorer watcher, tray, auto-start, full uninstaller.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="roadmap">
+  <h2><span class="no">13</span>Roadmap — explicitly deferred</h2>
+  <hr class="h2-rule">
+  <p>Deferred deliberately; the IndexStore and the versioned storage format exist today specifically so these are cheap to add without re-architecting:</p>
+  <div class="grid2">
+    <div class="card"><h4>Search across notes</h4><p>Index-driven; no full-drive rescan needed.</p></div>
+    <div class="card"><h4>View history UI</h4><p>The 20-entry history is already stored; only the surface is missing.</p></div>
+    <div class="card"><h4>Color tags &amp; bulk manager</h4><p>Categorize and manage notes across many files at once.</p></div>
+    <div class="card"><h4>CSV / JSON export</h4><p>Walk the index, emit the histories.</p></div>
+    <div class="card"><h4>Tier-2 settings</h4><p>Dark/light theming, floating-panel layout option.</p></div>
+    <div class="card"><h4>Cloud-provider APIs</h4><p>OneDrive Graph / Google Drive / Dropbox APIs for files that never touch a local synced folder — a separate milestone, if ever.</p></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="faq">
+  <h2><span class="no">14</span>Troubleshooting</h2>
+  <hr class="h2-rule">
+  <div class="tablewrap"><table>
+    <tr><th>Symptom</th><th>Explanation / fix</th></tr>
+    <tr><td>Ran <code>FileTag.App.exe</code>, "nothing happened"</td><td>The portable exe is not a wizard — it starts in the tray and shows a balloon. The install wizard is <code>FileTag-Setup.exe</code>.</td></tr>
+    <tr><td>Hotkey does nothing</td><td>Another app owns the combo — FileTag toasts about this at startup. Remap in Settings (a real registration probe validates the new combo).</td></tr>
+    <tr><td>Input language flips when using the hotkey</td><td>Shift+Alt is Windows' language switcher when multiple input languages are installed. Remap, or remove unused languages.</td></tr>
+    <tr><td>Bar doesn't appear on click</td><td>Passive display covers Explorer windows and the desktop, and only files that actually have a note. Multi-selection is deliberately silent.</td></tr>
+    <tr><td>Note vanished after copying a file to USB / email</td><td>Expected on untracked transfers — see Known limitations. Within NTFS drives and supported cloud folders, notes travel.</td></tr>
+    <tr><td>SmartScreen warns on first run</td><td>Binaries are unsigned. More info → Run anyway.</td></tr>
+    <tr><td>Anything unclear</td><td>Tray → <strong>Open logs folder</strong> — every install step, save, failure, and uninstall action is a plain-text log line. Deep tracing: set <code>FILETAG_DEBUG=1</code> before launch.</td></tr>
+  </table></div>
+</section>
+
+<footer class="doc-footer">
+  <span>FileTag Product Document · v4.0.0</span>
+  <span>Windows 10/11 · .NET 8 · WPF</span>
+  <span>Free · GitHub Releases · no accounts, no telemetry</span>
+</footer>
+</main>
+</div>
