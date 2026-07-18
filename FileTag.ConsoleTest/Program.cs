@@ -135,6 +135,29 @@ try
     StorageRouter.Delete(moved);
     Check("orphaned sidecar cleaned up", !File.Exists(sidecar));
 
+    // ---------- folder comments (ADS on a directory) ----------
+    CloudFolderDetector.SetRootsForTesting([]);
+    string taggedDir = Path.Combine(dir, "tagged-folder");
+    Directory.CreateDirectory(taggedDir);
+    var dirWrite = Directory.GetLastWriteTimeUtc(taggedDir);
+    Check("folder: no comment initially", !StorageRouter.HasComment(taggedDir));
+    StorageRouter.Save(taggedDir, "note on a folder");
+    Check("folder: HasComment after save", StorageRouter.HasComment(taggedDir));
+    Check("folder: read back", StorageRouter.ReadLatest(taggedDir)?.Text == "note on a folder");
+    Check("folder: no sidecar on NTFS", !File.Exists(taggedDir + SidecarHelper.Suffix));
+    Check("folder: timestamps preserved", Directory.GetLastWriteTimeUtc(taggedDir) == dirWrite);
+    StorageRouter.Delete(taggedDir);
+    Check("folder: delete works", !StorageRouter.HasComment(taggedDir));
+
+    // ---------- folder comments (sidecar in a cloud folder) ----------
+    CloudFolderDetector.SetRootsForTesting([dir]);
+    StorageRouter.Save(taggedDir, "cloud folder note");
+    Check("folder: cloud sidecar created", File.Exists(taggedDir + SidecarHelper.Suffix));
+    Check("folder: cloud read back", StorageRouter.ReadLatest(taggedDir)?.Text == "cloud folder note");
+    StorageRouter.Delete(taggedDir);
+    Check("folder: cloud delete works", !StorageRouter.HasComment(taggedDir));
+    CloudFolderDetector.SetRootsForTesting([]);
+
     // ---------- cloud-root readme drop ----------
     CloudFolderDetector.SetRootsForTesting([dir]);
     string readme = Path.Combine(dir, StorageRouter.CloudReadmeName);

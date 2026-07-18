@@ -44,7 +44,7 @@ runtime is bundled).
 
 | You want to… | Do this |
 |---|---|
-| **Add a note to a file** | Select it (Explorer or desktop) and press **Shift + Alt + N** |
+| **Add a note to a file or folder** | Select it (Explorer or desktop) and press **Shift + Alt + N** |
 | **Add a note from any other app** | Copy the file (Ctrl+C), then press **Shift + Alt + N** anywhere |
 | **Add a note to "some file somewhere"** | Press **Shift + Alt + N** with nothing selected — a file picker opens |
 | **Read a note** | Just click the file in Explorer or on the desktop — the bar appears |
@@ -156,6 +156,9 @@ live in a folder that's being deleted).
 
 ## Version history
 
+- **4.2.0** — Notes can now be attached to **folders** as well as files, on
+  both backends. Unresolvable selections fall through to the file picker
+  instead of a dead-end message.
 - **4.1.0** — One-time explanatory `_FileTag_ReadMe.txt` dropped at cloud
   sync roots so collaborators aren't puzzled by `.filetag` files; hardened
   cloud-detection fallback (degrades to local-only notes, never breaks).

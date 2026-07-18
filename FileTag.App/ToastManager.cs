@@ -20,8 +20,9 @@ internal sealed class ToastManager
         Logger.Error($"{text}{(logDetail.Length > 0 ? $" ({logDetail})" : "")}");
     }
 
-    public void SelectSingleFile() =>
-        Toast("Select a single file to add a comment", "hotkey with no/multiple/non-file selection");
+    public void SelectSingleFile(int selectedCount) =>
+        Toast("Select a single file or folder to add a comment",
+            $"hotkey with {selectedCount} items selected");
 
     public void LocationUnsupported() =>
         Toast("This location isn't supported yet", "no available backend");

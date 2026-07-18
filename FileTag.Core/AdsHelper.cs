@@ -1,14 +1,17 @@
+using System.Runtime.InteropServices;
+
 namespace FileTag.Core;
 
 /// <summary>
 /// <see cref="ICommentStore"/> backed by an NTFS alternate data stream —
-/// "&lt;path&gt;:FileTag.txt" — the default for files on local NTFS drives.
-/// The comment lives inside the file, so renames and moves within NTFS carry
-/// it automatically, and no extra file ever appears next to the original.
+/// "&lt;path&gt;:FileTag.txt" — the default for files (and folders: directories
+/// carry ADS too) on local NTFS drives. The comment lives inside the item, so
+/// renames and moves within NTFS carry it automatically, and no extra file
+/// ever appears next to the original.
 ///
-/// Writing or deleting a stream would normally bump the host file's
-/// LastWriteTime, so original timestamps are captured and restored around
-/// every mutation — the file must look untouched.
+/// Writing or deleting a stream would normally bump the host's LastWriteTime,
+/// so original timestamps are captured and restored around every mutation —
+/// the file or folder must look untouched.
 /// </summary>
 public sealed class AdsHelper : ICommentStore
 {
@@ -16,9 +19,21 @@ public sealed class AdsHelper : ICommentStore
 
     private static string StreamPath(string filePath) => filePath + ":" + StreamName;
 
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern uint GetFileAttributesW(string lpFileName);
+    private const uint INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF;
+
+    /// <summary>File.Exists is false for streams on <em>directories</em> (the
+    /// directory attribute leaks through), so existence is checked natively.</summary>
+    private static bool StreamExists(string streamPath)
+    {
+        try { return GetFileAttributesW(streamPath) != INVALID_FILE_ATTRIBUTES; }
+        catch { return false; }
+    }
+
     public bool HasComment(string filePath)
     {
-        try { return File.Exists(StreamPath(filePath)); }
+        try { return StreamExists(StreamPath(filePath)); }
         catch { return false; }
     }
 
@@ -44,7 +59,7 @@ public sealed class AdsHelper : ICommentStore
         string sp = StreamPath(filePath);
         try
         {
-            if (!File.Exists(sp)) return;
+            if (!StreamExists(sp)) return;
             WithTimestampsPreserved(filePath, () => File.Delete(sp));
         }
         catch { /* stream gone or inaccessible — nothing to manage */ }
@@ -52,6 +67,7 @@ public sealed class AdsHelper : ICommentStore
 
     private static void WithTimestampsPreserved(string filePath, Action action)
     {
+        bool isDir = Directory.Exists(filePath);
         DateTime created = default, written = default, accessed = default;
         bool captured = false;
         try
@@ -68,9 +84,18 @@ public sealed class AdsHelper : ICommentStore
         if (!captured) return;
         try
         {
-            File.SetCreationTimeUtc(filePath, created);
-            File.SetLastWriteTimeUtc(filePath, written);
-            File.SetLastAccessTimeUtc(filePath, accessed);
+            if (isDir)
+            {
+                Directory.SetCreationTimeUtc(filePath, created);
+                Directory.SetLastWriteTimeUtc(filePath, written);
+                Directory.SetLastAccessTimeUtc(filePath, accessed);
+            }
+            else
+            {
+                File.SetCreationTimeUtc(filePath, created);
+                File.SetLastWriteTimeUtc(filePath, written);
+                File.SetLastAccessTimeUtc(filePath, accessed);
+            }
         }
         catch { /* best effort */ }
     }

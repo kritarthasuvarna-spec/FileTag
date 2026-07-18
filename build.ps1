@@ -1,6 +1,6 @@
 # FileTag release build: publishes self-contained binaries, produces the
 # distributable zip AND the Setup wizard exe in .\dist\
-param([string]$Version = "4.1.1")
+param([string]$Version = "4.2.0")
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot

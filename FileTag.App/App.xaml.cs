@@ -150,8 +150,8 @@ public partial class App : System.Windows.Application
             if (sel is not null)
             {
                 DebugLog.Write($"evaluate: fg={fg} cls={cls} sel=[{string.Join("; ", sel)}]");
-                // Exactly one *file* (multi-select is ambiguous; folders are out of scope)
-                if (sel.Count == 1 && File.Exists(sel[0])
+                // Exactly one file or folder (multi-select is ambiguous)
+                if (sel.Count == 1 && IsFileOrFolder(sel[0])
                     && !SidecarHelper.IsSidecar(sel[0]) && StorageRouter.HasComment(sel[0]))
                 {
                     var note = StorageRouter.ReadLatest(sel[0]);
@@ -191,11 +191,17 @@ public partial class App : System.Windows.Application
             else if (ShellSelection.IsDesktopClass(cls)) { sel = ShellSelection.GetDesktopSelectedPaths(); anchor = fg; }
             DebugLog.Write($"hotkey: sel=[{string.Join("; ", sel)}]");
 
-            if (sel.Count > 1) { _toasts.SelectSingleFile(); return; }        // multi-select is ambiguous
-            if (sel.Count == 1 && !File.Exists(sel[0])) { _toasts.SelectSingleFile(); return; } // folder/virtual item
-            if (sel.Count == 1 && SidecarHelper.IsSidecar(sel[0])) return;   // never comment a sidecar
+            if (sel.Count > 1) { _toasts.SelectSingleFile(sel.Count); return; } // multi-select is ambiguous
 
             string? path = sel.Count == 1 ? sel[0] : null;
+            if (path is not null && SidecarHelper.IsSidecar(path)) return;    // never comment a sidecar
+            if (path is not null && !IsFileOrFolder(path))
+            {
+                // Virtual/unresolvable item — log what it was and keep the
+                // hotkey alive via the clipboard/picker chain, not a dead end.
+                Logger.Warn($"hotkey: selection not resolvable as file/folder: \"{path}\"");
+                path = null;
+            }
 
             // 2. Nothing selected anywhere → a file copied to the clipboard counts.
             path ??= TryClipboardFile();
@@ -212,7 +218,7 @@ public partial class App : System.Windows.Application
                 path = dlg.FileName;
             }
 
-            if (!File.Exists(path) || SidecarHelper.IsSidecar(path)) return;
+            if (!IsFileOrFolder(path) || SidecarHelper.IsSidecar(path)) return;
 
             // Existing comment that can't be parsed/read → warn, don't overwrite blindly.
             var existing = StorageRouter.ReadLatest(path);
@@ -229,14 +235,17 @@ public partial class App : System.Windows.Application
         catch (Exception ex) { DebugLog.Write("hotkey EX: " + ex); }
     }
 
-    /// <summary>Exactly one existing file on the clipboard (CF_HDROP), else null.</summary>
+    private static bool IsFileOrFolder(string path) =>
+        File.Exists(path) || Directory.Exists(path);
+
+    /// <summary>Exactly one existing file/folder on the clipboard (CF_HDROP), else null.</summary>
     private static string? TryClipboardFile()
     {
         try
         {
             if (!System.Windows.Clipboard.ContainsFileDropList()) return null;
             var files = System.Windows.Clipboard.GetFileDropList();
-            if (files.Count == 1 && File.Exists(files[0])) return files[0];
+            if (files.Count == 1 && files[0] is string p && IsFileOrFolder(p)) return p;
         }
         catch { /* clipboard is flaky by nature */ }
         return null;
