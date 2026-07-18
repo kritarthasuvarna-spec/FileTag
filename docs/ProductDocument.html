@@ -233,7 +233,7 @@
 
 <main>
 <header class="masthead">
-  <div class="eyebrow">Product Document · v4.0.0 · July 2026</div>
+  <div class="eyebrow">Product Document · v4.1.0 · July 2026</div>
   <h1>🏷 FileTag</h1>
   <p class="lede">Attach a personal note to any file on your PC — stored invisibly with the file itself, carried through renames and moves, and synced across machines when the file lives in a Google&nbsp;Drive or OneDrive folder.</p>
   <div class="meta-row">
@@ -261,6 +261,9 @@
     <div class="card"><h4>Cross-device by riding existing sync</h4><p>Inside Google Drive Desktop or OneDrive folders, notes are written as small hidden files the sync engine uploads like anything else — so a note tagged on PC A appears on PC B. No accounts, no provider APIs, no internet dependency.</p></div>
     <div class="card"><h4>Nothing is silently overwritten</h4><p>Both backends store a capped 20-entry version history rather than a single string. Sync conflicts and accidental edits are recoverable, not lossy.</p></div>
   </div>
+
+  <h3>Competitive position</h3>
+  <p>Windows does ship a native "Comments" field (file Properties → Details), and FileTag was checked against it deliberately. The overlap is thin: the native field only exists for file types with a writable property handler (Office documents, some images and media) — plain text, PDFs, code, and arbitrary files can't be commented at all. Where it does work, it <em>modifies the file itself</em> (changing hashes and modified dates), is buried three dialogs deep, and displays nothing contextually. FileTag works on any file, never touches the file's content or timestamps, shows the note the moment the file is clicked, and syncs it across machines.</p>
 
   <h3>What FileTag deliberately is not</h3>
   <ul>
@@ -387,6 +390,15 @@ flowchart TD
     <tr><td>OneDrive</td><td>Every account under <span class="path">HKCU\Software\Microsoft\OneDrive\Accounts\*</span> (<code>UserFolder</code> value — Personal, Business1, Business2… never hardcoded), plus the <code>OneDrive</code> / <code>OneDriveConsumer</code> / <code>OneDriveCommercial</code> environment variables</td></tr>
     <tr><td>Google Drive Desktop</td><td>Mount points parsed from DriveFS preferences in <span class="path">HKCU\Software\Google\DriveFS</span>, plus a volume-label fallback that finds mounted "Google Drive" drives (streaming or mirror mode)</td></tr>
   </table></div>
+
+  <div class="callout warn">
+    <div class="c-label">Honest fragility note</div>
+    Cloud detection reads <em>undocumented local config</em>, not a public API — Google and Microsoft can change these internals without warning, so this is budgeted as occasional maintenance, not a one-time cost. Every source fails independently and silently: if detection breaks entirely, the router degrades to plain NTFS routing — notes keep working locally, they just lose the cross-device behavior instead of the app crashing.
+  </div>
+  <div class="callout">
+    <div class="c-label">Collaborator visibility — mitigated, not hidden</div>
+    Companion files are hidden in your own Explorer but fully visible to anyone else sharing the Drive/OneDrive folder — on the web, on phones, on Macs. So the first note saved into a detected sync root also drops a one-time <code>_FileTag_ReadMe.txt</code> there (only if absent, targeting <em>My Drive</em> on letter-mounted Google Drive since the virtual root isn't writable), turning a confusing stray file into a self-explanatory one.
+  </div>
 
   <h3>The local index — cache, never truth</h3>
   <p><span class="path">%LOCALAPPDATA%\FileTag\index.json</span> tracks which paths currently carry a note, so future features (search, export, bulk manage) never need a full-drive rescan. It stores <em>paths only, never note text</em>, is fully rebuildable, and can go stale but never wrong — note text always lives in whichever backend owns the file. Its one load-bearing job today: telling the uninstaller which files to clean.</p>
@@ -563,6 +575,8 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
   <ul>
     <li><strong>Sending a file elsewhere strips the note</strong> — email attachment, upload to an untracked web service, non-supported sync products. By design, not a bug to chase.</li>
     <li><strong>True cloud-only files</strong> (never synced locally, web-only) aren't reachable — sidecar storage requires a local synced folder to exist.</li>
+    <li><strong>Companion files are visible to shared-folder collaborators</strong> — hidden only in your own Explorer, not cross-user. Mitigated by the one-time explanatory readme at the sync root, not fully solved.</li>
+    <li><strong>Cloud detection can silently lose cross-device behavior</strong> if Google/Microsoft change their local config formats — degrades to local-only notes, never crashes.</li>
     <li><strong>Renaming a file in a cloud/USB folder orphans its companion note.</strong> ADS follows renames; a sidecar can't. The note isn't lost — it's still there under the old name — but won't display until re-linked manually.</li>
     <li><strong>Sync conflicts aren't auto-merged.</strong> Editing the same file's note offline on two PCs produces two histories that need a manual merge — recoverable thanks to versioning, but not automatic.</li>
     <li><strong>Shift+Alt is also Windows' input-language switcher</strong> when multiple keyboard languages are installed — the default hotkey can flip input language as a side effect. Remap in Settings if it bites.</li>
@@ -590,7 +604,9 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
   <h2><span class="no">12</span>Version history</h2>
   <hr class="h2-rule">
   <div class="verhist">
-    <div class="ver"><span class="v">4.0.0</span><span class="d">July 2026 · current</span>
+    <div class="ver"><span class="v">4.1.0</span><span class="d">July 2026 · current</span>
+      <p>One-time explanatory readme dropped at cloud sync roots for collaborators · hardened, documented graceful degradation of cloud detection · competitive check vs. Windows' native Comments field.</p></div>
+    <div class="ver"><span class="v">4.0.0</span><span class="d">July 2026</span>
       <p>Setup wizard with embedded payload and real logged steps · uninstall wizard with live tagged-file count and per-file progress · shared logging system across install/app/uninstall with tray shortcut · reinstall race guard · relocation balloon.</p></div>
     <div class="ver"><span class="v">3.0.0</span><span class="d">July 2026</span>
       <p>Live-apply Settings window (edge, monitor, accent, auto-hide, animation, remappable hotkey with conflict probe) · recurring failure toasts.</p></div>
@@ -635,7 +651,7 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
 </section>
 
 <footer class="doc-footer">
-  <span>FileTag Product Document · v4.0.0</span>
+  <span>FileTag Product Document · v4.1.0</span>
   <span>Windows 10/11 · .NET 8 · WPF</span>
   <span>Free · GitHub Releases · no accounts, no telemetry</span>
 </footer>
