@@ -18,18 +18,21 @@ public static class CloudFolderDetector
     private static DateTime _lastScanUtc = DateTime.MinValue;
     private static string[]? _testOverride;
 
-    public static bool IsInCloudFolder(string path)
+    public static bool IsInCloudFolder(string path) => GetRootFor(path) is not null;
+
+    /// <summary>The cloud sync root containing this path, or null.</summary>
+    public static string? GetRootFor(string path)
     {
         string full;
         try { full = Path.GetFullPath(path); }
-        catch { return false; }
+        catch { return null; }
 
         foreach (string root in GetRoots())
         {
             if (full.StartsWith(root, StringComparison.OrdinalIgnoreCase))
-                return true;
+                return root;
         }
-        return false;
+        return null;
     }
 
     /// <summary>Current sync roots, each normalized with a trailing separator.</summary>
@@ -53,6 +56,13 @@ public static class CloudFolderDetector
 
     private static string[] Scan()
     {
+        // Honest fragility note: every source below is undocumented local
+        // config, not a stable contract — Google and Microsoft can change
+        // these internals without warning. Each source therefore fails
+        // independently and silently; if everything fails the root list is
+        // simply empty and StorageRouter degrades gracefully to plain NTFS
+        // routing — comments keep working locally, they just lose the
+        // cross-device behavior instead of the app breaking.
         var roots = new List<string>();
 
         // --- OneDrive: environment variables -------------------------------

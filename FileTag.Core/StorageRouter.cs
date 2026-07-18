@@ -68,6 +68,52 @@ public static class StorageRouter
 
         // The comment now lives in the right backend — drop any stale copy.
         if (other.HasComment(filePath)) other.Delete(filePath);
+
+        if (ReferenceEquals(routed, Sidecar)) EnsureCloudRootReadme(filePath);
+    }
+
+    public const string CloudReadmeName = "_FileTag_ReadMe.txt";
+
+    /// <summary>
+    /// Sidecar files aren't invisible to collaborators — anyone sharing the
+    /// Drive/OneDrive folder sees ".filetag" files on the web, on a phone, on
+    /// a Mac. So the first write into a detected sync root drops a one-time
+    /// explanatory readme there (only if absent), turning a confusing stray
+    /// file into a self-explanatory one.
+    /// </summary>
+    private static void EnsureCloudRootReadme(string filePath)
+    {
+        try
+        {
+            string? root = CloudFolderDetector.GetRootFor(filePath);
+            if (root is null) return; // non-cloud sidecar (USB stick) — skip
+
+            // Google Drive letter-mounts: the virtual drive root (I:\) is not
+            // writable — "My Drive" beneath it is the real writable root.
+            if (string.Equals(Path.GetPathRoot(root), root, StringComparison.OrdinalIgnoreCase))
+            {
+                string myDrive = Path.Combine(root, "My Drive");
+                if (Directory.Exists(myDrive)) root = myDrive;
+            }
+
+            string readme = Path.Combine(root, CloudReadmeName);
+            if (File.Exists(readme)) return;
+            File.WriteAllText(readme,
+                "About the \".filetag\" files in this folder\r\n" +
+                "===========================================\r\n" +
+                "\r\n" +
+                "These small hidden files are created by FileTag, a free Windows utility\r\n" +
+                "that lets people attach personal notes to their files.\r\n" +
+                "\r\n" +
+                "Each \"<name>.filetag\" holds a short note about the file \"<name>\" sitting\r\n" +
+                "next to it, so the note can sync between the owner's computers along with\r\n" +
+                "the file itself.\r\n" +
+                "\r\n" +
+                "They are safe to ignore. Deleting a .filetag file only deletes the note,\r\n" +
+                "never the file it belongs to.\r\n");
+            Logger.Info($"dropped {CloudReadmeName} at sync root: {root}");
+        }
+        catch { /* read-only share etc. — the note itself still saved */ }
     }
 
     /// <summary>Removes the comment from both backends. Files are untouched.</summary>

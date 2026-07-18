@@ -94,6 +94,14 @@ Both backends store the same format: a small JSON version history (capped at
 20 entries). A local index (paths only, never note text) is kept in
 `%LocalAppData%\FileTag` so future features like search stay fast.
 
+Two honest notes about the cloud path: the companion files are hidden in
+*your* Explorer, but people you share a Drive/OneDrive folder with can see
+them (web UI, phones, Macs) — so the first note saved into a sync folder
+also drops a one-time `_FileTag_ReadMe.txt` at the sync root explaining
+what they are. And cloud-folder detection reads local Google/Microsoft
+config that isn't a public API; if either vendor changes it, FileTag
+quietly falls back to local-only notes rather than breaking.
+
 ### Limitations you should know
 
 - **Renaming a file in a cloud/USB folder orphans its note** — the companion
@@ -148,6 +156,9 @@ live in a folder that's being deleted).
 
 ## Version history
 
+- **4.1.0** — One-time explanatory `_FileTag_ReadMe.txt` dropped at cloud
+  sync roots so collaborators aren't puzzled by `.filetag` files; hardened
+  cloud-detection fallback (degrades to local-only notes, never breaks).
 - **4.0.0** — **Setup wizard** (`FileTag-Setup.exe`: Welcome / Location /
   Options / real progress / Finish), **uninstall wizard** with live tagged-file
   count and per-file progress, and a **shared logging system** across

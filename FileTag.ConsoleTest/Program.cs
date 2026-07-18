@@ -135,6 +135,20 @@ try
     StorageRouter.Delete(moved);
     Check("orphaned sidecar cleaned up", !File.Exists(sidecar));
 
+    // ---------- cloud-root readme drop ----------
+    CloudFolderDetector.SetRootsForTesting([dir]);
+    string readme = Path.Combine(dir, StorageRouter.CloudReadmeName);
+    string cloudFile = Path.Combine(dir, "readme-trigger.txt");
+    File.WriteAllText(cloudFile, "x");
+    StorageRouter.Save(cloudFile, "first cloud note");
+    Check("readme dropped at sync root", File.Exists(readme));
+    var readmeTime = File.GetLastWriteTimeUtc(readme);
+    StorageRouter.Save(cloudFile, "second note");
+    Check("readme not rewritten", File.GetLastWriteTimeUtc(readme) == readmeTime);
+    Check("readme mentions .filetag", File.ReadAllText(readme).Contains(".filetag"));
+    StorageRouter.Delete(cloudFile);
+    CloudFolderDetector.SetRootsForTesting([]);
+
     // ---------- sidecar guard ----------
     Check("sidecar path detected", SidecarHelper.IsSidecar(sidecar));
     Check("normal path not sidecar", !SidecarHelper.IsSidecar(migrant));
