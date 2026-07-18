@@ -47,7 +47,16 @@ public partial class App : System.Windows.Application
         }
 
         _mutex = new Mutex(true, "FileTag.App.SingleInstance", out bool createdNew);
-        if (!createdNew) { Shutdown(); return; }
+        if (!createdNew)
+        {
+            // Dying silently here reads as "the app is broken" — say something.
+            System.Windows.MessageBox.Show(
+                "FileTag is already running — look for the tag icon in the system tray.\n\n" +
+                "To run this copy instead, exit the running one first (tray icon → Exit).",
+                "FileTag", MessageBoxButton.OK, MessageBoxImage.Information);
+            Shutdown();
+            return;
+        }
 
         Logger.Init("App");
         Logger.Info($"FileTag {typeof(App).Assembly.GetName().Version?.ToString(3)} starting from {InstallHelper.ExePath}");
