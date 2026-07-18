@@ -68,7 +68,14 @@ internal sealed class UninstallRunner
 
         try
         {
-            Directory.Delete(IndexStore.DataDirectory, recursive: true);
+            // File-specific, never recursive: the data dir can coincide with the
+            // install dir (default setup location) or contain user files.
+            foreach (string f in new[] { "index.json", "debug.log" })
+            {
+                string p = Path.Combine(IndexStore.DataDirectory, f);
+                if (File.Exists(p)) File.Delete(p);
+            }
+            try { Directory.Delete(IndexStore.DataDirectory); } catch { /* not empty — fine */ }
             Logger.Info("local index/config removed");
         }
         catch (Exception ex) { Logger.Warn("data dir: " + ex.Message); }
@@ -90,8 +97,16 @@ internal sealed class UninstallRunner
     /// cancels a still-pending deletion instead of letting it eat the new files.</summary>
     public const string PendingDeletionSentinel = ".filetag-uninstall-pending";
 
-    /// <summary>Deletes the install folder after this process exits — but only
-    /// if the sentinel still exists at fire time (guards against a quick reinstall).</summary>
+    /// <summary>The only files uninstall may delete from the install folder.
+    /// A portable copy can live in a folder full of the user's other files —
+    /// those are never FileTag's to touch, so cleanup is manifest-based and the
+    /// folder itself is removed only if it is empty afterwards.</summary>
+    private static readonly string[] OwnedFiles =
+        ["FileTag.App.exe", "Uninstall.exe", "README.md", "debug.log", "index.json", PendingDeletionSentinel];
+
+    /// <summary>Deletes FileTag's own files (and the folder, only if then empty)
+    /// after this process exits — and only if the sentinel still exists at fire
+    /// time (guards against a quick reinstall).</summary>
     public void ScheduleInstallFolderDeletion()
     {
         string installDir = AppContext.BaseDirectory.TrimEnd('\\');
@@ -99,17 +114,18 @@ internal sealed class UninstallRunner
         {
             string sentinel = Path.Combine(installDir, PendingDeletionSentinel);
             File.WriteAllText(sentinel, DateTime.Now.ToString("o"));
+            string dels = string.Join(" ", OwnedFiles.Select(f => $"\"{Path.Combine(installDir, f)}\""));
             Process.Start(new ProcessStartInfo
             {
                 FileName = "cmd.exe",
-                Arguments = $"/c ping -n 4 127.0.0.1 >nul & if exist \"{sentinel}\" rd /s /q \"{installDir}\"",
+                Arguments = $"/c ping -n 4 127.0.0.1 >nul & if exist \"{sentinel}\" (del /f /q {dels} & rd \"{installDir}\")",
                 CreateNoWindow = true,
                 UseShellExecute = false,
                 WorkingDirectory = Path.GetTempPath(),
             });
-            Logger.Info($"install folder deletion scheduled: {installDir}");
+            Logger.Info($"cleanup of FileTag's own files scheduled in: {installDir} (folder removed only if empty)");
         }
-        catch (Exception ex) { Logger.Error("folder deletion: " + ex.Message); }
+        catch (Exception ex) { Logger.Error("folder cleanup: " + ex.Message); }
     }
 
     /// <summary>Called at normal app startup: cancels a pending deletion of the
