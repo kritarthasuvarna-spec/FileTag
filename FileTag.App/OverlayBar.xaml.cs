@@ -25,6 +25,11 @@ public partial class OverlayBar : Window
 
     public BarState State { get; private set; } = BarState.Hidden;
     public bool IsEditing => State == BarState.Edit;
+
+    /// <summary>True only when the user actually typed something in edit mode —
+    /// an untouched editor may be abandoned when the selection moves on.</summary>
+    public bool IsEditingDirty => IsEditing && EditBox.Text != _originalEditText;
+    private string _originalEditText = "";
     public string? CurrentPath { get; private set; }
 
     /// <summary>Raised when the user saves; the app persists and then calls CompleteSave.</summary>
@@ -133,6 +138,7 @@ public partial class OverlayBar : Window
         EditButton.Visibility = Visibility.Collapsed;
 
         EditBox.Text = existing?.Text ?? "";
+        _originalEditText = EditBox.Text;
         EditBox.CaretIndex = EditBox.Text.Length; // cursor at end, per spec
         UpdateCounter();
 
@@ -162,6 +168,7 @@ public partial class OverlayBar : Window
     {
         _autoHide.Stop();
         if (State == BarState.Hidden || _hiding) return;
+        SetNoActivate(true);
         State = BarState.Hidden;
         CurrentPath = null;
         _currentNote = null;

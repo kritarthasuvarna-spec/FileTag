@@ -156,6 +156,9 @@ live in a folder that's being deleted).
 
 ## Version history
 
+- **4.2.1** — The bar now always follows your selection: clicking another
+  item updates or hides it immediately. An editor with unsaved typing is
+  still protected; an untouched one is released.
 - **4.2.0** — Notes can now be attached to **folders** as well as files, on
   both backends. Unresolvable selections fall through to the file picker
   instead of a dead-end message.

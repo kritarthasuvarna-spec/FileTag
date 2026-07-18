@@ -137,8 +137,6 @@ public partial class App : System.Windows.Application
     {
         try
         {
-            if (_bar.IsEditing) return; // never yank an in-progress edit
-
             IntPtr fg = NativeMethods.GetForegroundWindow();
             if (fg == _bar.Handle) return; // user is interacting with the bar itself
 
@@ -146,6 +144,15 @@ public partial class App : System.Windows.Application
             List<string>? sel = null;
             if (cls == "CabinetWClass") sel = ShellSelection.GetSelectedPaths(fg);
             else if (ShellSelection.IsDesktopClass(cls)) sel = ShellSelection.GetDesktopSelectedPaths();
+
+            if (_bar.IsEditing)
+            {
+                // Unsaved typing is protected; an untouched editor is abandoned
+                // once the selection moves to a different item.
+                bool sameItem = sel is { Count: 1 }
+                    && string.Equals(sel[0], _bar.CurrentPath, StringComparison.OrdinalIgnoreCase);
+                if (_bar.IsEditingDirty || sameItem || sel is null) return;
+            }
 
             if (sel is not null)
             {
