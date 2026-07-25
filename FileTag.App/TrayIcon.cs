@@ -11,6 +11,7 @@ internal sealed class TrayIcon : IDisposable
 {
     private readonly NotifyIcon _icon;
     private string? _balloonUrl;
+    private Action? _balloonAction;
 
     public TrayIcon(IndexStore index, Action onExit, Action onSettings, Action onTutorial)
     {
@@ -55,7 +56,11 @@ internal sealed class TrayIcon : IDisposable
             ContextMenuStrip = menu,
             Visible = true,
         };
-        _icon.BalloonTipClicked += (_, _) => { if (_balloonUrl is not null) OpenUrl(_balloonUrl); };
+        _icon.BalloonTipClicked += (_, _) =>
+        {
+            if (_balloonAction is not null) _balloonAction();
+            else if (_balloonUrl is not null) OpenUrl(_balloonUrl);
+        };
     }
 
     private static Icon LoadIcon()
@@ -69,9 +74,10 @@ internal sealed class TrayIcon : IDisposable
         return SystemIcons.Application;
     }
 
-    public void ShowBalloon(string title, string text, string? openUrlOnClick = null)
+    public void ShowBalloon(string title, string text, string? openUrlOnClick = null, Action? onClick = null)
     {
         _balloonUrl = openUrlOnClick;
+        _balloonAction = onClick;
         _icon.ShowBalloonTip(8000, title, text, ToolTipIcon.Info);
     }
 

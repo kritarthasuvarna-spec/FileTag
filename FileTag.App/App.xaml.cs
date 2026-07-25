@@ -72,6 +72,7 @@ public partial class App : System.Windows.Application
 
         _bar = new OverlayBar();
         _bar.SaveRequested += OnSaveRequested;
+        _bar.DeleteConfirmed += OnDeleteConfirmed;
 
         _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial);
         _toasts = new ToastManager(_tray);
@@ -237,6 +238,8 @@ public partial class App : System.Windows.Application
 
             if (!IsFileOrFolder(path) || SidecarHelper.IsSidecar(path)) return;
 
+            CancelPendingDeleteFor(path); // re-editing revives a pending delete
+
             // Existing comment that can't be parsed/read → warn, don't overwrite blindly.
             var existing = StorageRouter.ReadLatest(path);
             if (existing is null && StorageRouter.HasComment(path))
@@ -269,10 +272,67 @@ public partial class App : System.Windows.Application
         return null;
     }
 
+    // ---- delete with undo grace period -------------------------------------
+    // Confirming Delete hides the comment immediately, but the underlying
+    // stream/sidecar deletion is held ~5s; Undo (the toast) just cancels it —
+    // nothing has left the disk yet.
+    private DispatcherTimer? _undoTimer;
+    private string? _pendingDeletePath;
+
+    private void OnDeleteConfirmed(string path)
+    {
+        CommitPendingDelete(); // a previous pending delete commits first
+        _pendingDeletePath = path;
+        _undoTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+        _undoTimer.Tick += (_, _) => { _undoTimer!.Stop(); CommitPendingDelete(); };
+        _undoTimer.Start();
+        _bar.HideBar();
+        _tray.ShowBalloon("Comment deleted", "Click here to Undo", onClick: UndoPendingDelete);
+        Logger.Info($"delete pending (5s undo): {path}");
+    }
+
+    private void CommitPendingDelete()
+    {
+        _undoTimer?.Stop();
+        if (_pendingDeletePath is null) return;
+        string p = _pendingDeletePath;
+        _pendingDeletePath = null;
+        try
+        {
+            StorageRouter.Delete(p);
+            _index.RemovePath(p);
+            Logger.Info($"delete committed: {p}");
+        }
+        catch (Exception ex) { Logger.Error($"delete failed: {p} — {ex.Message}"); }
+    }
+
+    private void UndoPendingDelete()
+    {
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (_pendingDeletePath is null) return; // window expired
+            Logger.Info($"delete undone: {_pendingDeletePath}");
+            _undoTimer?.Stop();
+            _pendingDeletePath = null;
+            _tray.ShowBalloon("FileTag", "Comment restored.");
+        });
+    }
+
+    private void CancelPendingDeleteFor(string path)
+    {
+        if (string.Equals(_pendingDeletePath, path, StringComparison.OrdinalIgnoreCase))
+        {
+            _undoTimer?.Stop();
+            _pendingDeletePath = null;
+            Logger.Info($"pending delete cancelled by new activity: {path}");
+        }
+    }
+
     private void OnSaveRequested(string path, string text)
     {
         try
         {
+            CancelPendingDeleteFor(path); // saving over a pending delete keeps the new comment
             StorageRouter.Save(path, text); // empty text deletes the comment
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -295,6 +355,7 @@ public partial class App : System.Windows.Application
 
     private void ExitApp()
     {
+        CommitPendingDelete(); // don't lose an intended delete on exit
         Logger.Info("exit via tray menu");
         _watcher?.Dispose();
         _hotkey?.Dispose();

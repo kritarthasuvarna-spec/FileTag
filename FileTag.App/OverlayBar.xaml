@@ -80,6 +80,28 @@
                                VerticalAlignment="Center" Margin="0,0,4,0"/>
                     <Button x:Name="EditButton" Content="Edit" Style="{StaticResource BarButton}"
                             Click="EditButton_Click"/>
+                    <Button x:Name="DeleteButton" Content="Delete" Click="DeleteButton_Click">
+                        <Button.Style>
+                            <!-- warning red on hover: visually distinct from routine actions -->
+                            <Style TargetType="Button" BasedOn="{StaticResource BarButton}">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="Bg" Background="{TemplateBinding Background}"
+                                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Bg" Property="Background" Value="#C24242"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                     <Button x:Name="CloseButton" Content="✕" Style="{StaticResource BarButton}"
                             Padding="9,5" Click="CloseButton_Click"/>
                 </StackPanel>
@@ -88,6 +110,19 @@
             <!-- Read mode -->
             <TextBlock x:Name="CommentText" Grid.Row="1" TextWrapping="Wrap" FontSize="13.5"
                        Foreground="{StaticResource TextBrush}" LineHeight="19"/>
+
+            <!-- Delete confirm (inline, never a modal popup) -->
+            <DockPanel x:Name="ConfirmPanel" Grid.Row="1" Visibility="Collapsed" LastChildFill="False">
+                <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" FontSize="13"
+                           Foreground="{StaticResource TextBrush}"
+                           Text="Delete this comment? This can't be undone after the grace period."/>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="ConfirmDeleteBtn" Content="Delete" Style="{StaticResource BarButton}"
+                            Background="#C24242" Click="ConfirmDelete_Click"/>
+                    <Button Content="Cancel" Style="{StaticResource BarButton}" Background="Transparent"
+                            BorderThickness="0" Click="ConfirmCancel_Click"/>
+                </StackPanel>
+            </DockPanel>
 
             <!-- Edit mode -->
             <Grid x:Name="EditPanel" Grid.Row="1" Visibility="Collapsed">

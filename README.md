@@ -49,7 +49,7 @@ runtime is bundled).
 | **Add a note to "some file somewhere"** | Press **Shift + Alt + N** with nothing selected — a file picker opens |
 | **Read a note** | Just click the file in Explorer or on the desktop — the bar appears |
 | **Edit a note** | Click **Edit** on the bar, or press the hotkey again |
-| **Remove a note** | Edit it, delete all the text, save |
+| **Remove a note** | Click **Delete** on the bar, confirm — you get 5 seconds to Undo via the toast |
 | **Save while typing** | **Ctrl + Enter** (or the Save button) |
 | **Cancel while typing** | **Esc** (or the Discard button) |
 | **Change how FileTag looks/behaves** | Tray icon → **Settings…** |
@@ -156,6 +156,13 @@ live in a folder that's being deleted).
 
 ## Version history
 
+- **5.1.0** — **Delete with confirm and undo**: a Delete button on the bar,
+  inline confirmation (Esc or clicking away always cancels), and a 5-second
+  undo toast before anything actually leaves the disk. Translucency fixed —
+  real blur-behind that clips to the panel's rounded corners.
+- **5.0.0** — **Panel Appearance** (bar/pill style, background color, corner
+  radius, size, font scale, opt-in blur) and the **interactive first-run
+  tutorial** with verified hotkey step and embedded demo animation.
 - **4.2.1** — The bar now always follows your selection: clicking another
   item updates or hides it immediately. An editor with unsaved typing is
   still protected; an untouched one is released.

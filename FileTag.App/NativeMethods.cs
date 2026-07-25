@@ -119,6 +119,13 @@ internal static class NativeMethods
     public const uint SWP_NOACTIVATE = 0x0010;
     public const uint SWP_SHOWWINDOW = 0x0040;
 
+    // --- Window region (clips blur to the panel's rounded shape) -------------
+    [DllImport("gdi32.dll")]
+    public static extern IntPtr CreateRoundRectRgn(int x1, int y1, int x2, int y2, int cx, int cy);
+
+    [DllImport("user32.dll")]
+    public static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
+
     // --- Acrylic blur-behind (SetWindowCompositionAttribute) ----------------
     [StructLayout(LayoutKind.Sequential)]
     private struct ACCENT_POLICY { public int AccentState, AccentFlags, GradientColor, AnimationId; }
@@ -129,16 +136,18 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     private static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WINCOMPATTRDATA data);
 
-    /// <summary>Enables/disables acrylic blur behind a layered window.
-    /// tintAbgr = 0xAABBGGRR tint applied over the blur.</summary>
+    /// <summary>Enables/disables blur behind a layered window.
+    /// Uses ACCENT_ENABLE_BLURBEHIND (3): the acrylic state (4) is broken on
+    /// current Win11 builds for layered WPF windows — no blur or heavy lag.
+    /// The tint comes from the window's own translucent background instead.</summary>
     public static void SetAcrylic(IntPtr hwnd, bool enable, uint tintAbgr)
     {
         try
         {
             var accent = new ACCENT_POLICY
             {
-                AccentState = enable ? 4 /* ACCENT_ENABLE_ACRYLICBLURBEHIND */ : 0,
-                GradientColor = unchecked((int)tintAbgr),
+                AccentState = enable ? 3 /* ACCENT_ENABLE_BLURBEHIND */ : 0,
+                GradientColor = 0,
             };
             IntPtr p = Marshal.AllocHGlobal(Marshal.SizeOf<ACCENT_POLICY>());
             try

@@ -21,7 +21,7 @@ namespace FileTag.App;
 /// </summary>
 public partial class OverlayBar : Window
 {
-    public enum BarState { Hidden, Read, Edit }
+    public enum BarState { Hidden, Read, Edit, ConfirmDelete }
 
     public BarState State { get; private set; } = BarState.Hidden;
     public bool IsEditing => State == BarState.Edit;
@@ -34,6 +34,9 @@ public partial class OverlayBar : Window
 
     /// <summary>Raised when the user saves; the app persists and then calls CompleteSave.</summary>
     public event Action<string, string>? SaveRequested;
+
+    /// <summary>Raised only by an explicit click on the red Delete button.</summary>
+    public event Action<string>? DeleteConfirmed;
 
     private Note? _currentNote;
     private IntPtr _hwnd;
@@ -66,6 +69,16 @@ public partial class OverlayBar : Window
         {
             ApplySettings();
             if (State != BarState.Hidden) Reposition();
+        };
+
+        Deactivated += (_, _) => CancelConfirmDelete();
+        PreviewKeyDown += (_, e) =>
+        {
+            if (e.Key == Key.Escape && State == BarState.ConfirmDelete)
+            {
+                CancelConfirmDelete();
+                e.Handled = true;
+            }
         };
     }
 
@@ -149,7 +162,9 @@ public partial class OverlayBar : Window
         TimestampText.Text = "edited " + note.ModifiedUtc.ToLocalTime().ToString("d MMM yyyy, HH:mm");
         CommentText.Visibility = Visibility.Visible;
         EditPanel.Visibility = Visibility.Collapsed;
+        ConfirmPanel.Visibility = Visibility.Collapsed;
         EditButton.Visibility = Visibility.Visible;
+        DeleteButton.Visibility = Visibility.Visible;
 
         SetNoActivate(true);
         if (!alreadyVisible || !samePath) ShowWithSlide();
@@ -169,7 +184,9 @@ public partial class OverlayBar : Window
             : "edited " + existing.ModifiedUtc.ToLocalTime().ToString("d MMM yyyy, HH:mm");
         CommentText.Visibility = Visibility.Collapsed;
         EditPanel.Visibility = Visibility.Visible;
+        ConfirmPanel.Visibility = Visibility.Collapsed;
         EditButton.Visibility = Visibility.Collapsed;
+        DeleteButton.Visibility = Visibility.Collapsed;
 
         EditBox.Text = existing?.Text ?? "";
         _originalEditText = EditBox.Text;
@@ -225,6 +242,36 @@ public partial class OverlayBar : Window
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e) => HideBar();
+
+    private void DeleteButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (State != BarState.Read) return;
+        _autoHide.Stop(); // never auto-hide mid-confirmation
+        State = BarState.ConfirmDelete;
+        CommentText.Visibility = Visibility.Collapsed;
+        ConfirmPanel.Visibility = Visibility.Visible;
+        EditButton.Visibility = Visibility.Collapsed;
+        DeleteButton.Visibility = Visibility.Collapsed;
+    }
+
+    private void ConfirmDelete_Click(object sender, RoutedEventArgs e)
+    {
+        // The only path that fires the destructive action.
+        if (CurrentPath is not null) DeleteConfirmed?.Invoke(CurrentPath);
+    }
+
+    private void ConfirmCancel_Click(object sender, RoutedEventArgs e) => CancelConfirmDelete();
+
+    /// <summary>Losing the confirmation in any way — Cancel, Esc, deactivation,
+    /// selection change — always cancels, never confirms.</summary>
+    public void CancelConfirmDelete()
+    {
+        if (State != BarState.ConfirmDelete) return;
+        if (_currentNote is not null && CurrentPath is not null)
+            ShowRead(CurrentPath, _currentNote, _explorerHwnd);
+        else
+            HideBar();
+    }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e) => DoSave();
 
@@ -346,6 +393,19 @@ public partial class OverlayBar : Window
 
         NativeMethods.SetWindowPos(_hwnd, NativeMethods.HWND_TOPMOST, x, y, barWidthPx, barHeightPx,
             NativeMethods.SWP_NOACTIVATE);
+
+        // Blur-behind is rectangular by nature; clip the window to the panel's
+        // rounded shape so blur can't bleed past the corners.
+        if (settings.Translucency)
+        {
+            int rpx = (int)(Math.Clamp(settings.CornerRadius, 0, 24) * scale) * 2;
+            NativeMethods.SetWindowRgn(_hwnd,
+                NativeMethods.CreateRoundRectRgn(0, 0, barWidthPx + 1, barHeightPx + 1, rpx, rpx), true);
+        }
+        else
+        {
+            NativeMethods.SetWindowRgn(_hwnd, IntPtr.Zero, true);
+        }
     }
 
     private IntPtr ResolveMonitor(int monitorIndex)
