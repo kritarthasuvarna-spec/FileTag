@@ -43,9 +43,20 @@ public partial class SettingsWindow : Window
 
     private void UpdatePreviewEdge()
     {
-        bool bottom = SettingsService.Instance.Current.IsBottomEdge;
+        var s = SettingsService.Instance.Current;
+        bool bottom = s.IsBottomEdge;
         PreviewBar.VerticalAlignment = bottom ? VerticalAlignment.Bottom : VerticalAlignment.Top;
-        PreviewBar.CornerRadius = bottom ? new CornerRadius(8, 8, 0, 0) : new CornerRadius(0, 0, 8, 8);
+        double r = s.CornerRadius / 2.0; // preview is ~half scale
+        if (s.IsPill)
+        {
+            PreviewBar.CornerRadius = new CornerRadius(r);
+            PreviewBar.Margin = new Thickness(40, bottom ? 0 : 8, 40, bottom ? 8 : 0);
+        }
+        else
+        {
+            PreviewBar.CornerRadius = bottom ? new CornerRadius(r, r, 0, 0) : new CornerRadius(0, 0, r, r);
+            PreviewBar.Margin = new Thickness(14, 0, 14, 0);
+        }
     }
 
     private void HotkeyBox_GotFocus(object sender, KeyboardFocusChangedEventArgs e) =>

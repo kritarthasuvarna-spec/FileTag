@@ -40,8 +40,11 @@ public sealed class SettingsService
                 var s = JsonSerializer.Deserialize<AppSettings>(File.ReadAllText(SettingsPath), JsonOpts);
                 if (s is not null)
                 {
-                    // schemaVersion 1 is current; future migrations hook in here.
+                    // schemaVersion 2 is current; v1 files gain the Panel fields
+                    // as defaults automatically. Future migrations hook in here.
+                    s.SchemaVersion = 2;
                     s.AutoHideSeconds = Math.Clamp(s.AutoHideSeconds, 2, 15);
+                    s.CornerRadius = Math.Clamp(s.CornerRadius, 0, 24);
                     return s;
                 }
             }

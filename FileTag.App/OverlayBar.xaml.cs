@@ -49,6 +49,7 @@ public partial class OverlayBar : Window
         {
             _hwnd = new WindowInteropHelper(this).Handle;
             SetNoActivate(true);
+            ApplySettings(); // acrylic needs the hwnd
         };
         SizeChanged += (_, _) => { if (State != BarState.Hidden) Reposition(); };
 
@@ -68,7 +69,8 @@ public partial class OverlayBar : Window
         };
     }
 
-    /// <summary>Pulls live values from AppSettings (accent color, edge shape).</summary>
+    /// <summary>Pulls live values from AppSettings (accent, panel style/color/
+    /// radius/size/font scale, translucency).</summary>
     private void ApplySettings()
     {
         var s = SettingsService.Instance.Current;
@@ -78,12 +80,44 @@ public partial class OverlayBar : Window
                 (Color)ColorConverter.ConvertFromString(s.AccentColor));
         }
         catch { /* invalid hex — keep previous accent */ }
-        RootBorder.CornerRadius = s.IsBottomEdge
-            ? new CornerRadius(12, 12, 0, 0)
-            : new CornerRadius(0, 0, 12, 12);
-        RootBorder.BorderThickness = s.IsBottomEdge
-            ? new Thickness(1, 1, 1, 0)
-            : new Thickness(1, 0, 1, 1);
+
+        // Panel background (translucency lowers the tint alpha so blur shows).
+        Color panel;
+        try { panel = (Color)ColorConverter.ConvertFromString(s.PanelColor); }
+        catch { panel = Color.FromRgb(0x1E, 0x1E, 0x2B); }
+        panel.A = s.Translucency ? (byte)0xB0 : (byte)0xF5;
+        RootBorder.Background = new SolidColorBrush(panel);
+
+        int r = Math.Clamp(s.CornerRadius, 0, 24);
+        if (s.IsPill)
+        {
+            RootBorder.CornerRadius = new CornerRadius(r);
+            RootBorder.BorderThickness = new Thickness(1);
+        }
+        else
+        {
+            RootBorder.CornerRadius = s.IsBottomEdge
+                ? new CornerRadius(r, r, 0, 0) : new CornerRadius(0, 0, r, r);
+            RootBorder.BorderThickness = s.IsBottomEdge
+                ? new Thickness(1, 1, 1, 0) : new Thickness(1, 0, 1, 1);
+        }
+
+        RootBorder.Padding = s.IsCompact
+            ? new Thickness(12, 7, 12, 9) : new Thickness(18, 11, 18, 13);
+        if (RootBorder.Child is FrameworkElement content)
+        {
+            double f = s.FontScaleFactor;
+            content.LayoutTransform = f == 1.0 ? null : new ScaleTransform(f, f);
+        }
+
+        if (_hwnd != IntPtr.Zero) ApplyAcrylic(s, panel);
+    }
+
+    private void ApplyAcrylic(AppSettings s, Color panel)
+    {
+        // ABGR tint over the blur; a light tint keeps text readable.
+        uint tint = (uint)(0x99 << 24 | panel.B << 16 | panel.G << 8 | panel.R);
+        NativeMethods.SetAcrylic(_hwnd, s.Translucency, tint);
     }
 
     private void RestartAutoHide()
@@ -297,12 +331,18 @@ public partial class OverlayBar : Window
             scale = dpiX / 96.0;
 
         int workWidthPx = mi.rcWork.Right - mi.rcWork.Left;
-        int barWidthPx = (int)(Math.Min(900, (workWidthPx / scale) * 0.75) * scale);
+        double widthDip = settings.IsPill
+            ? Math.Min(560, (workWidthPx / scale) * 0.55)
+            : Math.Min(900, (workWidthPx / scale) * 0.75);
+        int barWidthPx = (int)(widthDip * scale);
         int barHeightPx = (int)Math.Ceiling(ActualHeight * scale);
         if (barHeightPx <= 0) barHeightPx = (int)(64 * scale);
 
+        int edgeGapPx = settings.IsPill ? (int)(12 * scale) : 0; // pill floats off the edge
         int x = mi.rcWork.Left + (workWidthPx - barWidthPx) / 2;
-        int y = settings.IsBottomEdge ? mi.rcWork.Bottom - barHeightPx : mi.rcWork.Top;
+        int y = settings.IsBottomEdge
+            ? mi.rcWork.Bottom - barHeightPx - edgeGapPx
+            : mi.rcWork.Top + edgeGapPx;
 
         NativeMethods.SetWindowPos(_hwnd, NativeMethods.HWND_TOPMOST, x, y, barWidthPx, barHeightPx,
             NativeMethods.SWP_NOACTIVATE);

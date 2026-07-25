@@ -8,7 +8,7 @@ namespace FileTag.App.Settings;
 /// </summary>
 public sealed class AppSettings
 {
-    public int SchemaVersion { get; set; } = 1;
+    public int SchemaVersion { get; set; } = 2;
 
     // --- Position -----------------------------------------------------------
     /// <summary>"Top" or "Bottom".</summary>
@@ -20,6 +20,30 @@ public sealed class AppSettings
     // --- Appearance -----------------------------------------------------------
     /// <summary>Hex color for accent elements (Save button etc.).</summary>
     public string AccentColor { get; set; } = "#4F8EF7";
+
+    // --- Panel appearance (bounded: presets and sliders, not a theme editor) ---
+    /// <summary>"Bar" (full-width) or "Pill" (floating, centered).</summary>
+    public string BarStyle { get; set; } = "Bar";
+
+    /// <summary>Panel background — separate from accent, which governs buttons/badge only.</summary>
+    public string PanelColor { get; set; } = "#1E1E2B";
+
+    /// <summary>0–24 px: sharp rectangle to full pill.</summary>
+    public int CornerRadius { get; set; } = 12;
+
+    /// <summary>"Compact" or "Comfortable" padding preset.</summary>
+    public string SizePreset { get; set; } = "Comfortable";
+
+    /// <summary>"Small", "Medium", or "Large".</summary>
+    public string FontScale { get; set; } = "Medium";
+
+    /// <summary>Real Windows acrylic blur behind the panel. Off by default (perf cost).</summary>
+    public bool Translucency { get; set; }
+
+    [JsonIgnore] public bool IsPill => BarStyle.Equals("Pill", StringComparison.OrdinalIgnoreCase);
+    [JsonIgnore] public double FontScaleFactor => FontScale.ToLowerInvariant() switch
+    { "small" => 0.88, "large" => 1.15, _ => 1.0 };
+    [JsonIgnore] public bool IsCompact => SizePreset.Equals("Compact", StringComparison.OrdinalIgnoreCase);
 
     // --- Behavior --------------------------------------------------------------
     /// <summary>Seconds before the read-mode bar hides itself (2–15).</summary>

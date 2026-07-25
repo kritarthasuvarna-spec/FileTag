@@ -82,6 +82,48 @@
                     </StackPanel>
                 </Border>
 
+                <TextBlock Text="PANEL" Style="{StaticResource SectionHeader}"/>
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Bar style" Margin="0,0,0,2"/>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton Content="Full-width bar" IsChecked="{Binding StyleBar}"/>
+                            <RadioButton Content="Floating pill" IsChecked="{Binding StylePill}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="Background" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBox Width="92" Text="{Binding PanelColor, UpdateSourceTrigger=LostFocus}"
+                                     Background="#3D3D4D" Foreground="{StaticResource Text}"
+                                     BorderBrush="#5A5A6E" Padding="6,3" CaretBrush="{StaticResource Text}"/>
+                            <Border Width="22" Height="22" CornerRadius="4" Margin="8,0,0,0"
+                                    Background="{Binding PanelBrush}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="Corner radius" VerticalAlignment="Center"/>
+                            <Slider Width="150" Minimum="0" Maximum="24" Margin="10,0"
+                                    IsSnapToTickEnabled="True" TickFrequency="1"
+                                    Value="{Binding CornerRadius}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding CornerRadiusLabel}" VerticalAlignment="Center"
+                                       Foreground="{StaticResource Dim}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                            <TextBlock Text="Size" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <ComboBox Width="120" SelectedIndex="{Binding SizeSelectedIndex}">
+                                <ComboBoxItem Content="Comfortable"/>
+                                <ComboBoxItem Content="Compact"/>
+                            </ComboBox>
+                            <TextBlock Text="Font" VerticalAlignment="Center" Margin="14,0,8,0"/>
+                            <ComboBox Width="100" SelectedIndex="{Binding FontScaleSelectedIndex}">
+                                <ComboBoxItem Content="Small"/>
+                                <ComboBoxItem Content="Medium"/>
+                                <ComboBoxItem Content="Large"/>
+                            </ComboBox>
+                        </StackPanel>
+                        <CheckBox Content="Real translucency (acrylic blur — costs a little performance)"
+                                  IsChecked="{Binding Translucency}" Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
                 <TextBlock Text="BEHAVIOR" Style="{StaticResource SectionHeader}"/>
                 <Border Style="{StaticResource CardStyle}">
                     <StackPanel>
@@ -127,7 +169,7 @@
             <Border Background="#101018" CornerRadius="8" Height="170" Padding="8">
                 <Grid x:Name="PreviewScreen">
                     <!-- mock desktop -->
-                    <Border x:Name="PreviewBar" Background="#F51E1E2B" BorderBrush="#33FFFFFF"
+                    <Border x:Name="PreviewBar" Background="{Binding PanelBrush}" BorderBrush="#33FFFFFF"
                             BorderThickness="1" CornerRadius="8,8,0,0" VerticalAlignment="Bottom"
                             Padding="10,7" Margin="14,0">
                         <StackPanel>

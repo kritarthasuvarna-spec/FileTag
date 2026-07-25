@@ -73,7 +73,7 @@ public partial class App : System.Windows.Application
         _bar = new OverlayBar();
         _bar.SaveRequested += OnSaveRequested;
 
-        _tray = new TrayIcon(_index, ExitApp, OpenSettings);
+        _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial);
         _toasts = new ToastManager(_tray);
 
         _hotkey = new HotkeyManager();
@@ -93,8 +93,8 @@ public partial class App : System.Windows.Application
 
         if (!_index.FirstRunShown)
         {
-            _tray.ShowBalloon("FileTag is running",
-                $"Select a file and press {SettingsService.Instance.Current.HotkeyDisplay} to add a comment.");
+            // A balloon is too easy to miss — show the interactive tutorial.
+            OpenTutorial();
             _index.FirstRunShown = true;
         }
         else if (!string.Equals(previousLocation, currentLocation, StringComparison.OrdinalIgnoreCase))
@@ -118,6 +118,16 @@ public partial class App : System.Windows.Application
         bool ok = _hotkey.Apply(s.HotkeyCtrl, s.HotkeyShift, s.HotkeyAlt, s.HotkeyKey);
         if (ok) _appliedHotkey = s.HotkeyDisplay;
         else if (warnOnFailure) _toasts.HotkeyConflict(s.HotkeyDisplay);
+    }
+
+    private TutorialWindow? _tutorial;
+
+    private void OpenTutorial()
+    {
+        if (_tutorial is { IsLoaded: true }) { _tutorial.Activate(); return; }
+        _tutorial = new TutorialWindow();
+        _tutorial.Show();
+        _tutorial.Activate();
     }
 
     private void OpenSettings()
@@ -238,6 +248,7 @@ public partial class App : System.Windows.Application
             // Any drive works now: NTFS gets an ADS stream, everything else
             // (FAT32 sticks, cloud-sync folders) gets a hidden sidecar file.
             _bar.ShowEdit(path, existing, anchor);
+            _tutorial?.HotkeyVerified(); // completes the tutorial's verified step
         }
         catch (Exception ex) { DebugLog.Write("hotkey EX: " + ex); }
     }

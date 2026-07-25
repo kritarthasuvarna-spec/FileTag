@@ -12,7 +12,7 @@ internal sealed class TrayIcon : IDisposable
     private readonly NotifyIcon _icon;
     private string? _balloonUrl;
 
-    public TrayIcon(IndexStore index, Action onExit, Action onSettings)
+    public TrayIcon(IndexStore index, Action onExit, Action onSettings, Action onTutorial)
     {
         string version = typeof(TrayIcon).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
 
@@ -20,6 +20,7 @@ internal sealed class TrayIcon : IDisposable
         menu.Items.Add(new ToolStripMenuItem($"FileTag v{version}") { Enabled = false });
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(new ToolStripMenuItem("Settings…", null, (_, _) => onSettings()));
+        menu.Items.Add(new ToolStripMenuItem("Show tutorial", null, (_, _) => onTutorial()));
         menu.Items.Add(new ToolStripMenuItem("Open logs folder", null, (_, _) =>
         {
             try
@@ -49,7 +50,7 @@ internal sealed class TrayIcon : IDisposable
 
         _icon = new NotifyIcon
         {
-            Text = "FileTag — " + FileTag.App.Settings.SettingsService.Instance.Current.HotkeyDisplay + " to comment a file",
+            Text = "FileTag — " + FileTag.App.Settings.SettingsService.Instance.Current.HotkeyDisplay + " to tag the selected file",
             Icon = LoadIcon(),
             ContextMenuStrip = menu,
             Visible = true,

@@ -104,6 +104,73 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     /// <summary>Swatch click helper.</summary>
     public void SetAccent(string hex) => AccentColor = hex;
 
+    // ---- Panel appearance ---------------------------------------------------
+
+    public bool StyleBar
+    {
+        get => !S.IsPill;
+        set { if (value) { S.BarStyle = "Bar"; Changed(); RaiseAll(); } }
+    }
+
+    public bool StylePill
+    {
+        get => S.IsPill;
+        set { if (value) { S.BarStyle = "Pill"; Changed(); RaiseAll(); } }
+    }
+
+    public string PanelColor
+    {
+        get => S.PanelColor;
+        set
+        {
+            string v = value?.Trim() ?? "";
+            if (!v.StartsWith('#')) v = "#" + v;
+            try
+            {
+                ColorConverter.ConvertFromString(v);
+                S.PanelColor = v;
+                Changed();
+            }
+            catch { /* invalid hex — ignore */ }
+            Raise(); Raise(nameof(PanelBrush));
+        }
+    }
+
+    public System.Windows.Media.Brush PanelBrush
+    {
+        get
+        {
+            try { return new SolidColorBrush((Color)ColorConverter.ConvertFromString(S.PanelColor)); }
+            catch { return Brushes.DarkSlateGray; }
+        }
+    }
+
+    public int CornerRadius
+    {
+        get => S.CornerRadius;
+        set { S.CornerRadius = Math.Clamp(value, 0, 24); Changed(); Raise(); Raise(nameof(CornerRadiusLabel)); }
+    }
+
+    public string CornerRadiusLabel => $"{S.CornerRadius}px";
+
+    public int SizeSelectedIndex
+    {
+        get => S.IsCompact ? 1 : 0;
+        set { S.SizePreset = value == 1 ? "Compact" : "Comfortable"; Changed(); Raise(); }
+    }
+
+    public int FontScaleSelectedIndex
+    {
+        get => S.FontScale.ToLowerInvariant() switch { "small" => 0, "large" => 2, _ => 1 };
+        set { S.FontScale = value switch { 0 => "Small", 2 => "Large", _ => "Medium" }; Changed(); Raise(); }
+    }
+
+    public bool Translucency
+    {
+        get => S.Translucency;
+        set { S.Translucency = value; Changed(); Raise(); }
+    }
+
     // ---- Behavior -----------------------------------------------------------
 
     public int AutoHideSeconds

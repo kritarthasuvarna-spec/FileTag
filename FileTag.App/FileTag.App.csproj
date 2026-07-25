@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>4.2.1</Version>
+    <Version>5.0.0</Version>
     <ApplicationIcon>filetag.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyTitle>FileTag</AssemblyTitle>
@@ -16,6 +16,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FileTag.Core\FileTag.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- embedded, never fetched over the network -->
+    <Resource Include="Assets\filetag_demo.gif" />
   </ItemGroup>
 
 </Project>

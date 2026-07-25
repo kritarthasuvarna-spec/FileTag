@@ -118,4 +118,42 @@ internal static class NativeMethods
     public static readonly IntPtr HWND_TOPMOST = new(-1);
     public const uint SWP_NOACTIVATE = 0x0010;
     public const uint SWP_SHOWWINDOW = 0x0040;
+
+    // --- Acrylic blur-behind (SetWindowCompositionAttribute) ----------------
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ACCENT_POLICY { public int AccentState, AccentFlags, GradientColor, AnimationId; }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WINCOMPATTRDATA { public int Attribute; public IntPtr Data; public int SizeOfData; }
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WINCOMPATTRDATA data);
+
+    /// <summary>Enables/disables acrylic blur behind a layered window.
+    /// tintAbgr = 0xAABBGGRR tint applied over the blur.</summary>
+    public static void SetAcrylic(IntPtr hwnd, bool enable, uint tintAbgr)
+    {
+        try
+        {
+            var accent = new ACCENT_POLICY
+            {
+                AccentState = enable ? 4 /* ACCENT_ENABLE_ACRYLICBLURBEHIND */ : 0,
+                GradientColor = unchecked((int)tintAbgr),
+            };
+            IntPtr p = Marshal.AllocHGlobal(Marshal.SizeOf<ACCENT_POLICY>());
+            try
+            {
+                Marshal.StructureToPtr(accent, p, false);
+                var data = new WINCOMPATTRDATA
+                {
+                    Attribute = 19 /* WCA_ACCENT_POLICY */,
+                    Data = p,
+                    SizeOfData = Marshal.SizeOf<ACCENT_POLICY>(),
+                };
+                SetWindowCompositionAttribute(hwnd, ref data);
+            }
+            finally { Marshal.FreeHGlobal(p); }
+        }
+        catch { /* unsupported OS build — panel simply stays opaque */ }
+    }
 }
