@@ -53,7 +53,7 @@
                 <Button x:Name="UpdateBtn" Style="{StaticResource AccentBtn}" Padding="14,9"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                         Click="Update_Click"/>
-                <Button Content="Uninstall first, then install fresh" Margin="0,8,0,0" Padding="14,9"
+                <Button Content="Uninstall only (Setup will close)" Margin="0,8,0,0" Padding="14,9"
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
                         Click="UninstallFirst_Click"/>
                 <TextBlock x:Name="WaitingText" Visibility="Collapsed" Margin="2,8,0,0" FontSize="12"
@@ -116,7 +116,8 @@
             <TextBlock x:Name="FinishText" TextWrapping="Wrap" FontSize="13" LineHeight="20"
                        Foreground="{StaticResource Dim}" Margin="0,14,0,0"
                        Text="Select any file in Explorer and press Shift+Alt+N to add your first note."/>
-            <Border CornerRadius="8" Background="#101018" Padding="6" Margin="0,12,0,0"
+            <StackPanel x:Name="FinishNotes" Margin="0,10,0,0"/>
+            <Border x:Name="FinishGif" CornerRadius="8" Background="#101018" Padding="6" Margin="0,12,0,0"
                     HorizontalAlignment="Left">
                 <Image gif:ImageBehavior.AnimatedSource="/Assets/filetag_demo.gif"
                        gif:ImageBehavior.RepeatBehavior="Forever" Height="150"/>

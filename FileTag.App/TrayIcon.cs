@@ -13,7 +13,7 @@ internal sealed class TrayIcon : IDisposable
     private string? _balloonUrl;
     private Action? _balloonAction;
 
-    public TrayIcon(IndexStore index, Action onExit, Action onSettings, Action onTutorial)
+    public TrayIcon(IndexStore index, Action onExit, Action onSettings, Action onTutorial, Action onWhatsNew)
     {
         string version = typeof(TrayIcon).Assembly.GetName().Version?.ToString(3) ?? "1.0.0";
 
@@ -22,6 +22,7 @@ internal sealed class TrayIcon : IDisposable
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add(new ToolStripMenuItem("Settings…", null, (_, _) => onSettings()));
         menu.Items.Add(new ToolStripMenuItem("Show tutorial", null, (_, _) => onTutorial()));
+        menu.Items.Add(new ToolStripMenuItem("What's New", null, (_, _) => onWhatsNew()));
         menu.Items.Add(new ToolStripMenuItem("Open logs folder", null, (_, _) =>
         {
             try

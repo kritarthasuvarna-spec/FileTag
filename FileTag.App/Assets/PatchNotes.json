@@ -1,0 +1,20 @@
+[
+  { "version": "5.3.0", "notes": [
+    "New What's New window - see what changed after every update (tray menu, and on the installer's finish screen).",
+    "Choosing Uninstall in Setup now simply uninstalls - it no longer chains into a reinstall." ] },
+  { "version": "5.2.0", "notes": [
+    "Setup detects an existing install and updates it in place - no more duplicate installs.",
+    "Clean install folder (app, uninstaller, README, license) and a Start Menu shortcut." ] },
+  { "version": "5.1.0", "notes": [
+    "Delete a note straight from the bar, with inline confirmation and 5 seconds to undo.",
+    "Translucency now shows real blur behind the panel." ] },
+  { "version": "5.0.0", "notes": [
+    "Panel appearance settings: full bar or floating pill, background color, corner radius, size, font scale, optional blur.",
+    "Interactive first-run tutorial with a demo animation." ] },
+  { "version": "4.2.0", "notes": [ "Notes can be attached to folders, not just files." ] },
+  { "version": "4.1.0", "notes": [ "A small readme is placed at your cloud sync root so collaborators understand the .filetag files." ] },
+  { "version": "4.0.0", "notes": [ "Setup and uninstall wizards, plus plain-text logs (tray menu, Open logs folder)." ] },
+  { "version": "3.0.0", "notes": [ "Settings window with live apply: position, accent color, auto-hide, animation, hotkey remap." ] },
+  { "version": "2.0.0", "notes": [ "Notes sync across PCs via Google Drive and OneDrive folders, and work on any drive." ] },
+  { "version": "1.0.0", "notes": [ "First release: notes on files via a hotkey and an overlay bar." ] }
+]

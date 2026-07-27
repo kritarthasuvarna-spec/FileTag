@@ -51,29 +51,48 @@ public partial class SetupWindow : Window
         else
         {
             FinishTitle.Text = "FileTag has been updated";
+            ShowUpdateNotes();
         }
         ShowScreen(4);
     }
 
+    /// <summary>"What's new since you last used FileTag" — only entries between
+    /// the old version (exclusive) and this build (inclusive).</summary>
+    private void ShowUpdateNotes()
+    {
+        Version.TryParse(_vm.ExistingVersion, out var oldV);
+        var entries = FileTag.App.PatchNotes.Load(
+            System.Reflection.Assembly.GetExecutingAssembly(), oldV);
+        if (entries.Count == 0) return;
+        FinishGif.Visibility = Visibility.Collapsed; // notes take priority over the demo
+        FinishNotes.Children.Add(new TextBlock
+        {
+            Text = "What's new since you last used FileTag:",
+            FontWeight = FontWeights.SemiBold, FontSize = 13,
+            Foreground = System.Windows.Media.Brushes.White,
+        });
+        foreach (var (v, notes) in entries)
+            foreach (string n in notes)
+                FinishNotes.Children.Add(new TextBlock
+                {
+                    Text = $"•  {n}  (v{v.ToString(3)})",
+                    TextWrapping = TextWrapping.Wrap, FontSize = 12,
+                    Foreground = new System.Windows.Media.SolidColorBrush(
+                        System.Windows.Media.Color.FromRgb(0x9B, 0x9B, 0xA8)),
+                    Margin = new Thickness(6, 2, 0, 0),
+                });
+    }
+
+    /// <summary>Uninstall only — deliberately does NOT chain into a fresh
+    /// install. Two destructive-adjacent actions stay two deliberate steps.</summary>
     private void UninstallFirst_Click(object sender, RoutedEventArgs e)
     {
         string uninst = Path.Combine(_vm.ExistingLocation!, "Uninstall.exe");
-        if (!File.Exists(uninst)) { ShowScreen(0); return; }
-        try { System.Diagnostics.Process.Start(uninst); } catch { ShowScreen(0); return; }
-
-        // The wizard runs in another process; proceed once the registry entry is gone.
-        WaitingText.Visibility = Visibility.Visible;
-        var poll = new System.Windows.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-        poll.Tick += (_, _) =>
+        if (File.Exists(uninst))
         {
-            if (!_vm.DetectExistingInstall())
-            {
-                poll.Stop();
-                WaitingText.Visibility = Visibility.Collapsed;
-                ShowScreen(0); // normal fresh-install flow
-            }
-        };
-        poll.Start();
+            try { System.Diagnostics.Process.Start(uninst); } catch { }
+        }
+        Close(); // Setup exits; re-run it separately for a fresh install
     }
 
     private void ShowScreen(int n)

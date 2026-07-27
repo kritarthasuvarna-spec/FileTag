@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>5.2.0</Version>
+    <Version>5.3.0</Version>
     <ApplicationIcon>filetag.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyTitle>FileTag</AssemblyTitle>
@@ -25,6 +25,7 @@
   <ItemGroup>
     <!-- embedded, never fetched over the network -->
     <Resource Include="Assets\filetag_demo.gif" />
+    <EmbeddedResource Include="Assets\PatchNotes.json" />
   </ItemGroup>
 
 </Project>

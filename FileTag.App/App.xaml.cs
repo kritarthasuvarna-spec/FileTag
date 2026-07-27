@@ -75,7 +75,8 @@ public partial class App : System.Windows.Application
         _bar.SaveRequested += OnSaveRequested;
         _bar.DeleteConfirmed += OnDeleteConfirmed;
 
-        _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial);
+        _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial,
+            () => new PatchNotesWindow().Show());
         _toasts = new ToastManager(_tray);
 
         _hotkey = new HotkeyManager();
@@ -111,6 +112,8 @@ public partial class App : System.Windows.Application
 
         if (Environment.GetEnvironmentVariable("FILETAG_OPEN_SETTINGS") == "1")
             OpenSettings(); // debug/test aid
+        if (Environment.GetEnvironmentVariable("FILETAG_OPEN_WHATSNEW") == "1")
+            new PatchNotesWindow().Show();
     }
 
     private void ApplyHotkeyFromSettings(bool warnOnFailure)
@@ -284,6 +287,9 @@ public partial class App : System.Windows.Application
     {
         CommitPendingDelete(); // a previous pending delete commits first
         _pendingDeletePath = path;
+        // Index entry goes NOW, not when the grace period closes — keeps the
+        // uninstaller's live "N tagged files" count accurate during the window.
+        _index.RemovePath(path);
         _undoTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
         _undoTimer.Tick += (_, _) => { _undoTimer!.Stop(); CommitPendingDelete(); };
         _undoTimer.Start();
@@ -314,6 +320,7 @@ public partial class App : System.Windows.Application
             if (_pendingDeletePath is null) return; // window expired
             Logger.Info($"delete undone: {_pendingDeletePath}");
             _undoTimer?.Stop();
+            _index.AddPath(_pendingDeletePath); // restore the index entry with the note
             _pendingDeletePath = null;
             _tray.ShowBalloon("FileTag", "Comment restored.");
         });
@@ -324,6 +331,7 @@ public partial class App : System.Windows.Application
         if (string.Equals(_pendingDeletePath, path, StringComparison.OrdinalIgnoreCase))
         {
             _undoTimer?.Stop();
+            _index.AddPath(path);
             _pendingDeletePath = null;
             Logger.Info($"pending delete cancelled by new activity: {path}");
         }
