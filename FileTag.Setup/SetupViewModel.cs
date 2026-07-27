@@ -23,6 +23,51 @@ public sealed class SetupViewModel : INotifyPropertyChanged
     public bool LaunchOnStartup { get; set; } = true;
     public bool LaunchAfterInstall { get; set; } = true;
 
+    // ---- existing-install detection (the fix for side-by-side installs) ----
+    public string? ExistingVersion { get; private set; }
+    public string? ExistingLocation { get; private set; }
+    public string NewVersion { get; } =
+        typeof(SetupViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
+
+    /// <summary>Reads the Apps &amp; Features key. True if a usable install exists.</summary>
+    public bool DetectExistingInstall()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Uninstall\FileTag");
+            string? loc = key?.GetValue("InstallLocation") as string;
+            if (string.IsNullOrEmpty(loc) || !Directory.Exists(loc)) return false;
+            ExistingLocation = loc;
+            ExistingVersion = key?.GetValue("DisplayVersion") as string ?? "?";
+            return true;
+        }
+        catch { return false; }
+    }
+
+    /// <summary>True when the payload is newer than the installed version
+    /// (System.Version comparison, never string compare).</summary>
+    public bool IsUpgrade =>
+        Version.TryParse(ExistingVersion, out var ex) && Version.TryParse(NewVersion, out var nw)
+            ? nw > ex : true;
+
+    /// <summary>Update-in-place: the target folder comes from the registry,
+    /// never from user choice — Update cannot create a second install.
+    /// Notes live in the tagged files and settings in %APPDATA%, so an
+    /// update structurally cannot touch either.</summary>
+    public void ConfigureAsUpdate()
+    {
+        InstallDir = ExistingLocation!;
+        // Preserve the user's startup preference instead of resetting it.
+        try
+        {
+            using var run = Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Run");
+            LaunchOnStartup = run?.GetValue("FileTag") is not null;
+        }
+        catch { }
+    }
+
     public string CurrentStep { get; private set; } = "";
     public double ProgressValue { get; private set; }
     public string? FailureMessage { get; private set; }
@@ -38,8 +83,9 @@ public sealed class SetupViewModel : INotifyPropertyChanged
         {
             await Step(1, "Copying files…", ExtractPayload);
             await Step(2, "Registering startup entry…", RegisterStartup);
-            await Step(3, "Detecting Google Drive / OneDrive folders…", DetectCloudFolders);
-            await Step(4, "Writing Apps & Features entry…", WriteUninstallEntry);
+            await Step(3, "Creating Start Menu shortcut…", CreateStartMenuShortcut);
+            await Step(4, "Detecting Google Drive / OneDrive folders…", DetectCloudFolders);
+            await Step(5, "Writing Apps & Features entry…", WriteUninstallEntry);
             CurrentStep = "Done";
             ProgressValue = 100;
             Notify();
@@ -58,7 +104,7 @@ public sealed class SetupViewModel : INotifyPropertyChanged
     private async Task Step(int number, string label, Action work)
     {
         CurrentStep = label;
-        ProgressValue = (number - 1) * 25;
+        ProgressValue = (number - 1) * 20;
         Notify();
         await Task.Run(work);
         Logger.Info($"step ok: {label}");
@@ -70,12 +116,7 @@ public sealed class SetupViewModel : INotifyPropertyChanged
             .GetManifestResourceStream("FileTag.Setup.payload.zip");
         if (payload is null) throw new InvalidOperationException("Setup payload missing — corrupted download?");
 
-        // A previous instance may be running from the target folder.
-        foreach (var p in Process.GetProcessesByName("FileTag.App"))
-        {
-            try { p.Kill(); p.WaitForExit(3000); } catch { }
-            finally { p.Dispose(); }
-        }
+        StopRunningApp();
 
         Directory.CreateDirectory(InstallDir);
         using var zip = new ZipArchive(payload, ZipArchiveMode.Read);
@@ -83,6 +124,44 @@ public sealed class SetupViewModel : INotifyPropertyChanged
 
         // Installing over a just-uninstalled copy: cancel its pending folder deletion.
         try { File.Delete(Path.Combine(InstallDir, ".filetag-uninstall-pending")); } catch { }
+    }
+
+    /// <summary>Ask the running app to exit gracefully (named event it listens
+    /// on), wait briefly, and only then fall back to killing the process.</summary>
+    private static void StopRunningApp()
+    {
+        var procs = Process.GetProcessesByName("FileTag.App");
+        if (procs.Length == 0) return;
+        try
+        {
+            if (EventWaitHandle.TryOpenExisting("FileTag.App.ExitRequest", out var ev))
+            {
+                using (ev) ev.Set();
+                foreach (var p in procs) { try { p.WaitForExit(5000); } catch { } }
+                Logger.Info("running app asked to exit gracefully");
+            }
+        }
+        catch { }
+        foreach (var p in procs)
+        {
+            try { if (!p.HasExited) { p.Kill(); p.WaitForExit(3000); Logger.Warn("app killed (graceful exit timed out)"); } }
+            catch { }
+            finally { p.Dispose(); }
+        }
+    }
+
+    private void CreateStartMenuShortcut()
+    {
+        var t = Type.GetTypeFromProgID("WScript.Shell")
+            ?? throw new InvalidOperationException("WScript.Shell unavailable");
+        dynamic shell = Activator.CreateInstance(t)!;
+        dynamic sc = shell.CreateShortcut(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.Programs), "FileTag.lnk"));
+        sc.TargetPath = InstalledExePath;
+        sc.WorkingDirectory = InstallDir;
+        sc.IconLocation = InstalledExePath;
+        sc.Description = "FileTag — notes on your files";
+        sc.Save();
     }
 
     private void RegisterStartup()

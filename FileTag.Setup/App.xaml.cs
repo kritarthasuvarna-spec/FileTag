@@ -13,6 +13,7 @@ public partial class App : Application
             if (e.Args.Any(a => a.Equals("/S", StringComparison.OrdinalIgnoreCase)))
             {
                 var vm = new SetupViewModel { LaunchAfterInstall = false };
+                if (vm.DetectExistingInstall()) vm.ConfigureAsUpdate(); // silent = update in place
                 bool ok = await vm.RunAsync();
                 Shutdown(ok ? 0 : 1);
                 return;

@@ -61,6 +61,7 @@ public partial class App : System.Windows.Application
         Logger.Init("App");
         Logger.Info($"FileTag {typeof(App).Assembly.GetName().Version?.ToString(3)} starting from {InstallHelper.ExePath}");
         UninstallRunner.CancelPendingDeletionHere();
+        ListenForExitRequests(); // lets Setup update in place with a graceful stop
 
         _index = new IndexStore();
         // Detect a new/changed install location before re-registering over it,
@@ -351,6 +352,25 @@ public partial class App : System.Windows.Application
         {
             _toasts.SaveFailed(ex.Message);
         }
+    }
+
+    public const string ExitEventName = "FileTag.App.ExitRequest";
+    private EventWaitHandle? _exitEvent;
+
+    private void ListenForExitRequests()
+    {
+        try
+        {
+            _exitEvent = new EventWaitHandle(false, EventResetMode.AutoReset, ExitEventName);
+            var t = new Thread(() =>
+            {
+                _exitEvent.WaitOne();
+                Logger.Info("graceful exit requested (updater)");
+                Dispatcher.BeginInvoke(ExitApp);
+            }) { IsBackground = true, Name = "FileTag.ExitListener" };
+            t.Start();
+        }
+        catch { /* updater falls back to killing the process */ }
     }
 
     private void ExitApp()

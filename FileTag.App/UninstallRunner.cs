@@ -68,6 +68,16 @@ internal sealed class UninstallRunner
 
         try
         {
+            if (File.Exists(InstallHelper.StartMenuShortcutPath))
+            {
+                File.Delete(InstallHelper.StartMenuShortcutPath);
+                Logger.Info("Start Menu shortcut removed");
+            }
+        }
+        catch (Exception ex) { Logger.Warn("start menu shortcut: " + ex.Message); }
+
+        try
+        {
             // File-specific, never recursive: the data dir can coincide with the
             // install dir (default setup location) or contain user files.
             foreach (string f in new[] { "index.json", "debug.log" })
@@ -102,7 +112,8 @@ internal sealed class UninstallRunner
     /// those are never FileTag's to touch, so cleanup is manifest-based and the
     /// folder itself is removed only if it is empty afterwards.</summary>
     private static readonly string[] OwnedFiles =
-        ["FileTag.App.exe", "Uninstall.exe", "README.md", "debug.log", "index.json", PendingDeletionSentinel];
+        ["FileTag.App.exe", "Uninstall.exe", "README.txt", "LICENSE.txt", "README.md",
+         "debug.log", "index.json", PendingDeletionSentinel];
 
     /// <summary>Deletes FileTag's own files (and the folder, only if then empty)
     /// after this process exits — and only if the sentinel still exists at fire

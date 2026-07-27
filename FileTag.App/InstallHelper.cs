@@ -28,14 +28,37 @@ internal static class InstallHelper
         catch { return null; }
     }
 
+    public static string StartMenuShortcutPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.Programs), "FileTag.lnk");
+
     public static void RegisterAll(bool startWithWindows)
     {
         try
         {
             SetStartup(startWithWindows);
             WriteUninstallEntry();
+            CreateStartMenuShortcut();
         }
         catch { /* registry unavailable — app still functions this session */ }
+    }
+
+    /// <summary>Start Menu entry — makes the install feel standard rather than
+    /// tray-only. Launching it while running just hits the second-instance message.</summary>
+    public static void CreateStartMenuShortcut()
+    {
+        try
+        {
+            var t = Type.GetTypeFromProgID("WScript.Shell");
+            if (t is null) return;
+            dynamic shell = Activator.CreateInstance(t)!;
+            dynamic sc = shell.CreateShortcut(StartMenuShortcutPath);
+            sc.TargetPath = ExePath;
+            sc.WorkingDirectory = Path.GetDirectoryName(ExePath);
+            sc.IconLocation = ExePath;
+            sc.Description = "FileTag — notes on your files";
+            sc.Save();
+        }
+        catch { }
     }
 
     public static void SetStartup(bool enabled)

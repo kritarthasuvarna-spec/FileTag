@@ -1,6 +1,6 @@
 # FileTag release build: publishes self-contained binaries, produces the
 # distributable zip AND the Setup wizard exe in .\dist\
-param([string]$Version = "5.1.0")
+param([string]$Version = "5.2.0")
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
@@ -27,7 +27,9 @@ dotnet publish FileTag.Uninstaller -c Release -r win-x64 --self-contained true `
 if ($LASTEXITCODE -ne 0) { throw "Uninstaller publish failed" }
 
 Copy-Item (Join-Path $unOut "Uninstall.exe") $appOut
-Copy-Item (Join-Path $PSScriptRoot "README.md") $appOut
+# clean 4-file layout: app, uninstaller, on-disk reference card, license
+Copy-Item (Join-Path $PSScriptRoot "install-assets\README.txt") $appOut
+Copy-Item (Join-Path $PSScriptRoot "install-assets\LICENSE.txt") $appOut
 Remove-Item $unOut -Recurse -Force
 Get-ChildItem $appOut -Filter *.pdb | Remove-Item
 
