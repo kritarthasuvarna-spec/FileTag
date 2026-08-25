@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>5.3.1</Version>
+    <Version>5.3.2</Version>
     <AssemblyName>FileTag.Setup</AssemblyName>
     <ApplicationIcon>..\FileTag.App\filetag.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>

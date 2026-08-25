@@ -11,8 +11,7 @@ namespace FileTag.App;
 /// </summary>
 internal static class UpdateChecker
 {
-    // TODO: point at the real repository once it exists on GitHub.
-    public const string RepoSlug = "viskitbiskit/FileTag";
+    public const string RepoSlug = "kritarthasuvarna-spec/FileTag";
     public static string ReleasesPage => $"https://github.com/{RepoSlug}/releases/latest";
 
     public static async Task CheckAsync(TrayIcon tray)
