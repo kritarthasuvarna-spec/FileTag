@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>5.3.0</Version>
+    <Version>5.3.1</Version>
     <AssemblyName>FileTag.Setup</AssemblyName>
     <ApplicationIcon>..\FileTag.App\filetag.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -21,10 +21,6 @@
     <Resource Include="..\FileTag.App\Assets\filetag_demo.gif" Link="Assets\filetag_demo.gif" />
     <EmbeddedResource Include="..\FileTag.App\Assets\PatchNotes.json" Link="Assets\PatchNotes.json" />
     <Compile Include="..\FileTag.App\PatchNotes.cs" Link="PatchNotes.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
   </ItemGroup>
 
 </Project>

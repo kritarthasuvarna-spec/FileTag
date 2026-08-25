@@ -72,6 +72,45 @@ public static class StorageRouter
         if (ReferenceEquals(routed, Sidecar)) EnsureCloudRootReadme(filePath);
     }
 
+    /// <summary>
+    /// Removes every sidecar note under a sync root, plus the explanatory
+    /// readme FileTag dropped there. The index is only a cache and can be lost,
+    /// which would strand notes with no app left to manage them; ADS notes are
+    /// invisible and unfindable without a full-drive scan, but sidecars are
+    /// visible to anyone sharing the folder — and sync roots are enumerable, so
+    /// these are exactly the leftovers worth sweeping. Returns how many were
+    /// removed. Never throws.
+    /// </summary>
+    public static int SweepSidecars(string root, Action<string>? onEach = null)
+    {
+        int removed = 0;
+        try
+        {
+            if (!Directory.Exists(root)) return 0;
+            foreach (string sidecar in Directory.EnumerateFiles(
+                         root, "*" + SidecarHelper.Suffix, SearchOption.AllDirectories))
+            {
+                try
+                {
+                    onEach?.Invoke(sidecar);
+                    File.SetAttributes(sidecar, FileAttributes.Normal);
+                    File.Delete(sidecar);
+                    removed++;
+                }
+                catch { /* locked/denied — leave it, keep sweeping */ }
+            }
+
+            // Google Drive letter-mounts keep the readme under "My Drive".
+            foreach (string r in new[] { Path.Combine(root, CloudReadmeName),
+                                         Path.Combine(root, "My Drive", CloudReadmeName) })
+            {
+                try { if (File.Exists(r)) File.Delete(r); } catch { }
+            }
+        }
+        catch { /* unreadable root — nothing to do */ }
+        return removed;
+    }
+
     public const string CloudReadmeName = "_FileTag_ReadMe.txt";
 
     /// <summary>

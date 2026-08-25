@@ -172,6 +172,27 @@ try
     StorageRouter.Delete(cloudFile);
     CloudFolderDetector.SetRootsForTesting([]);
 
+    // ---------- orphan sweep (index-loss safety net) ----------
+    string sweepRoot = Path.Combine(dir, "syncroot");
+    Directory.CreateDirectory(Path.Combine(sweepRoot, "sub"));
+    string userFile = Path.Combine(sweepRoot, "keep-me.txt");
+    File.WriteAllText(userFile, "user data");
+    string orphanHost = Path.Combine(sweepRoot, "sub", "orphan.txt");
+    File.WriteAllText(orphanHost, "x");
+    CloudFolderDetector.SetRootsForTesting([sweepRoot]);
+    StorageRouter.Save(orphanHost, "note the index forgot");
+    Check("sweep: sidecar present before", File.Exists(orphanHost + SidecarHelper.Suffix));
+    Check("sweep: readme present before", File.Exists(Path.Combine(sweepRoot, StorageRouter.CloudReadmeName)));
+    int swept = StorageRouter.SweepSidecars(sweepRoot);
+    Check("sweep: removed the orphan", swept == 1);
+    Check("sweep: sidecar gone", !File.Exists(orphanHost + SidecarHelper.Suffix));
+    Check("sweep: readme gone", !File.Exists(Path.Combine(sweepRoot, StorageRouter.CloudReadmeName)));
+    Check("sweep: host file untouched", File.Exists(orphanHost));
+    Check("sweep: unrelated user file untouched", File.ReadAllText(userFile) == "user data");
+    Check("sweep: rerun is a no-op", StorageRouter.SweepSidecars(sweepRoot) == 0);
+    Check("sweep: missing root is safe", StorageRouter.SweepSidecars(Path.Combine(dir, "nope")) == 0);
+    CloudFolderDetector.SetRootsForTesting([]);
+
     // ---------- sidecar guard ----------
     Check("sidecar path detected", SidecarHelper.IsSidecar(sidecar));
     Check("normal path not sidecar", !SidecarHelper.IsSidecar(migrant));

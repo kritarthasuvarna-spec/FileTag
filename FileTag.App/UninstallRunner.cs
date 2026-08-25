@@ -49,6 +49,8 @@ internal sealed class UninstallRunner
             }
         }
 
+        SweepOrphanedSidecars(onProgress);
+
         try
         {
             using var run = Registry.CurrentUser.OpenSubKey(
@@ -106,6 +108,23 @@ internal sealed class UninstallRunner
     /// Launching or reinstalling FileTag into the folder removes it, which
     /// cancels a still-pending deletion instead of letting it eat the new files.</summary>
     public const string PendingDeletionSentinel = ".filetag-uninstall-pending";
+
+    /// <summary>Safety net for notes the index never knew about (see
+    /// <see cref="StorageRouter.SweepSidecars"/>).</summary>
+    private void SweepOrphanedSidecars(Action<int, int, string>? onProgress)
+    {
+        foreach (string root in CloudFolderDetector.GetRoots())
+        {
+            Logger.Info($"sweeping sync root for orphaned notes: {root}");
+            int n = StorageRouter.SweepSidecars(root, path =>
+            {
+                onProgress?.Invoke(_paths.Count, _paths.Count, path);
+                Logger.Info($"stripped orphan: {path}");
+            });
+            Stripped += n;
+            if (n > 0) Logger.Info($"swept {n} orphaned note(s) from {root}");
+        }
+    }
 
     /// <summary>The only files uninstall may delete from the install folder.
     /// A portable copy can live in a folder full of the user's other files —

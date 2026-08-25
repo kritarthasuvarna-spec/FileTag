@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using FileTag.Core;
@@ -6,9 +6,9 @@ using FileTag.Core;
 namespace FileTag.App;
 
 /// <summary>
-/// Uninstall wizard: Confirm (live tagged-file count) → Progress (live
-/// per-file count) → Finish (summary + log link). Uninstall is destructive,
-/// so it is never silent for end users — the /S path exists only for
+/// Uninstall wizard: Confirm (live tagged-file count) â†’ Progress (live
+/// per-file count) â†’ Finish (summary + log link). Uninstall is destructive,
+/// so it is never silent for end users â€” the /S path exists only for
 /// automated testing.
 /// </summary>
 public partial class UninstallWindow : Window
@@ -20,7 +20,8 @@ public partial class UninstallWindow : Window
         InitializeComponent();
         int n = _runner.TaggedFileCount;
         ConfirmText.Text =
-            $"This will remove FileTag and delete comments from {n} tagged file{(n == 1 ? "" : "s")}. " +
+            $"This will remove FileTag and delete comments from {n} tagged file{(n == 1 ? "" : "s")}, " +
+            "plus any leftover notes found in your Google Drive / OneDrive folders. " +
             "The files themselves are not touched.\n\nThis can't be undone.";
     }
 
@@ -39,7 +40,7 @@ public partial class UninstallWindow : Window
         await Task.Run(() => _runner.Run((i, total, path) => Dispatcher.BeginInvoke(() =>
         {
             Progress.Value = i;
-            ProgressText.Text = $"Removing comment {i} of {total}…  {Path.GetFileName(path)}";
+            ProgressText.Text = $"Removing comment {i} of {total}â€¦  {Path.GetFileName(path)}";
         })));
 
         ProgressPanel.Visibility = Visibility.Collapsed;
