@@ -181,8 +181,13 @@ public partial class App : System.Windows.Application
             if (sel is not null)
             {
                 DebugLog.Write($"evaluate: fg={fg} cls={cls} sel=[{string.Join("; ", sel)}]");
-                // Exactly one file or folder (multi-select is ambiguous)
-                if (sel.Count == 1 && IsFileOrFolder(sel[0])
+                // Exactly one file or folder (multi-select is ambiguous). A file
+                // mid-delete-grace-period still has its comment on disk, but must not
+                // be shown or re-indexed as commented — that's what "reappears after
+                // deleting" would look like to the user.
+                bool pendingDelete = sel.Count == 1
+                    && string.Equals(sel[0], _pendingDeletePath, StringComparison.OrdinalIgnoreCase);
+                if (!pendingDelete && sel.Count == 1 && IsFileOrFolder(sel[0])
                     && !SidecarHelper.IsSidecar(sel[0]) && StorageRouter.HasComment(sel[0]))
                 {
                     var note = StorageRouter.ReadLatest(sel[0]);
