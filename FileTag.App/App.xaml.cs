@@ -75,8 +75,7 @@ public partial class App : System.Windows.Application
         _bar.SaveRequested += OnSaveRequested;
         _bar.DeleteConfirmed += OnDeleteConfirmed;
 
-        _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial,
-            () => new PatchNotesWindow().Show());
+        _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial, OpenWhatsNew);
         _toasts = new ToastManager(_tray);
 
         _hotkey = new HotkeyManager();
@@ -113,7 +112,7 @@ public partial class App : System.Windows.Application
         if (Environment.GetEnvironmentVariable("FILETAG_OPEN_SETTINGS") == "1")
             OpenSettings(); // debug/test aid
         if (Environment.GetEnvironmentVariable("FILETAG_OPEN_WHATSNEW") == "1")
-            new PatchNotesWindow().Show();
+            OpenWhatsNew();
     }
 
     private void ApplyHotkeyFromSettings(bool warnOnFailure)
@@ -123,6 +122,16 @@ public partial class App : System.Windows.Application
         bool ok = _hotkey.Apply(s.HotkeyCtrl, s.HotkeyShift, s.HotkeyAlt, s.HotkeyKey);
         if (ok) _appliedHotkey = s.HotkeyDisplay;
         else if (warnOnFailure) _toasts.HotkeyConflict(s.HotkeyDisplay);
+    }
+
+    private PatchNotesWindow? _patchNotes;
+
+    private void OpenWhatsNew()
+    {
+        if (_patchNotes is { IsLoaded: true }) { _patchNotes.Activate(); return; }
+        _patchNotes = new PatchNotesWindow();
+        _patchNotes.Show();
+        _patchNotes.Activate();
     }
 
     private TutorialWindow? _tutorial;
