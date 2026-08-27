@@ -38,6 +38,7 @@ string file = Path.Combine(dir, "victim.txt");
 File.WriteAllText(file, "original file content");
 var originalWrite = File.GetLastWriteTimeUtc(file);
 
+NotesBackup.SetPathForTesting(Path.Combine(dir, "backup-suite.json.gz"));
 try
 {
     // ---------- routing on a plain local NTFS path ----------
@@ -197,6 +198,36 @@ try
     Check("sidecar path detected", SidecarHelper.IsSidecar(sidecar));
     Check("normal path not sidecar", !SidecarHelper.IsSidecar(migrant));
 
+    // ---------- notes backup (last-resort recovery) ----------
+    string bkFile = Path.Combine(dir, "backed-up.txt");
+    File.WriteAllText(bkFile, "x");
+    StorageRouter.Save(bkFile, "first version");
+    var bk1 = NotesBackup.LoadAll();
+    Check("backup: entry created on save", bk1.Any(e => e.Path == bkFile));
+    Check("backup: not marked deleted after save", bk1.First(e => e.Path == bkFile).DeletedAtUtc is null);
+    Check("backup: text matches", bk1.First(e => e.Path == bkFile).History.Latest?.Text == "first version");
+
+    StorageRouter.Save(bkFile, "second version");
+    var bk2 = NotesBackup.LoadAll();
+    Check("backup: updates on re-save", bk2.First(e => e.Path == bkFile).History.Latest?.Text == "second version");
+    Check("backup: history accumulates", bk2.First(e => e.Path == bkFile).History.History.Count == 2);
+
+    StorageRouter.Delete(bkFile);
+    var bk3 = NotesBackup.LoadAll();
+    var deletedEntry = bk3.FirstOrDefault(e => e.Path == bkFile);
+    Check("backup: entry SURVIVES delete (the whole point)", deletedEntry is not null);
+    Check("backup: marked deleted with a timestamp", deletedEntry?.DeletedAtUtc is not null);
+    Check("backup: text still recoverable after delete", deletedEntry?.History.Latest?.Text == "second version");
+    Check("live comment actually gone", !StorageRouter.HasComment(bkFile));
+
+    // restoring un-deletes it in the backup too
+    StorageRouter.Save(bkFile, "restored");
+    Check("backup: un-deleted after restore save", NotesBackup.LoadAll().First(e => e.Path == bkFile).DeletedAtUtc is null);
+
+    // gzip round-trip integrity of the file already in use
+    Check("backup: gzip file actually written", File.Exists(NotesBackup.BackupPath));
+    Check("backup: gzip round-trip readable", NotesBackup.LoadAll().Any(e => e.History.Latest?.Text == "gzip check" || e.History.Latest?.Text == "restored"));
+
     // ---------- IndexStore round-trip ----------
     var index = new IndexStore();
     index.AddPath(migrant);
@@ -207,6 +238,7 @@ try
 finally
 {
     CloudFolderDetector.SetRootsForTesting(null);
+    NotesBackup.SetPathForTesting(null);
     try { Directory.Delete(dir, true); } catch { }
 }
 

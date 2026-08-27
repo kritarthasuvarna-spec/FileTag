@@ -75,7 +75,7 @@ public partial class App : System.Windows.Application
         _bar.SaveRequested += OnSaveRequested;
         _bar.DeleteConfirmed += OnDeleteConfirmed;
 
-        _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial, OpenWhatsNew);
+        _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial, OpenWhatsNew, OpenRecoverNotes);
         _toasts = new ToastManager(_tray);
 
         _hotkey = new HotkeyManager();
@@ -108,11 +108,30 @@ public partial class App : System.Windows.Application
         }
 
         _ = UpdateChecker.CheckAsync(_tray);
+        _ = Task.Run(BackfillNotesBackup);
 
         if (Environment.GetEnvironmentVariable("FILETAG_OPEN_SETTINGS") == "1")
             OpenSettings(); // debug/test aid
         if (Environment.GetEnvironmentVariable("FILETAG_OPEN_WHATSNEW") == "1")
             OpenWhatsNew();
+        if (Environment.GetEnvironmentVariable("FILETAG_OPEN_RECOVER") == "1")
+            OpenRecoverNotes();
+    }
+
+    /// <summary>One-time-per-launch mirror of every currently-tracked note into the
+    /// backup, so notes that predate this feature (or were never re-saved since)
+    /// still get a recovery snapshot without waiting for the user to edit them.</summary>
+    private void BackfillNotesBackup()
+    {
+        foreach (string path in _index.GetPaths())
+        {
+            try
+            {
+                var history = StorageRouter.ReadHistory(path);
+                if (history?.Latest is not null) NotesBackup.RecordSave(path, history);
+            }
+            catch { }
+        }
     }
 
     private void ApplyHotkeyFromSettings(bool warnOnFailure)
@@ -122,6 +141,16 @@ public partial class App : System.Windows.Application
         bool ok = _hotkey.Apply(s.HotkeyCtrl, s.HotkeyShift, s.HotkeyAlt, s.HotkeyKey);
         if (ok) _appliedHotkey = s.HotkeyDisplay;
         else if (warnOnFailure) _toasts.HotkeyConflict(s.HotkeyDisplay);
+    }
+
+    private RecoverNotesWindow? _recoverNotes;
+
+    private void OpenRecoverNotes()
+    {
+        if (_recoverNotes is { IsLoaded: true }) { _recoverNotes.Activate(); return; }
+        _recoverNotes = new RecoverNotesWindow(path => _index.AddPath(path));
+        _recoverNotes.Show();
+        _recoverNotes.Activate();
     }
 
     private PatchNotesWindow? _patchNotes;

@@ -70,6 +70,8 @@ public static class StorageRouter
         if (other.HasComment(filePath)) other.Delete(filePath);
 
         if (ReferenceEquals(routed, Sidecar)) EnsureCloudRootReadme(filePath);
+
+        NotesBackup.RecordSave(filePath, history);
     }
 
     /// <summary>
@@ -155,9 +157,11 @@ public static class StorageRouter
         catch { /* read-only share etc. — the note itself still saved */ }
     }
 
-    /// <summary>Removes the comment from both backends. Files are untouched.</summary>
+    /// <summary>Removes the comment from both backends. Files are untouched.
+    /// The backup mirror keeps the note (marked deleted) — that's the point.</summary>
     public static void Delete(string filePath)
     {
+        NotesBackup.RecordDelete(filePath);
         Ads.Delete(filePath);
         Sidecar.Delete(filePath);
     }

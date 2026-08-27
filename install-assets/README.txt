@@ -14,7 +14,14 @@ USING IT
   Delete a note ........... Delete button on the bar; 5 seconds to Undo
 
 TRAY MENU (right-click the tag icon)
-  Settings...  |  Show tutorial  |  Open logs folder  |  Exit
+  Settings...  |  Show tutorial  |  What's New  |  Recover Notes...  |
+  Open logs folder  |  Exit
+
+RECOVERING A DELETED NOTE
+  FileTag keeps a tiny local backup (gzip, usually a few hundred bytes) of
+  every note it has ever saved, specifically so an accidental delete is
+  recoverable. Tray menu -> Recover Notes... lists anything backed up that
+  no longer has a live comment, with a one-click Restore.
 
 WHERE THINGS LIVE
   This folder ............. the app and its uninstaller only

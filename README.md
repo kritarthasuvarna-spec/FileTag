@@ -124,6 +124,21 @@ if a newer release exists — nothing is ever installed automatically. To
 update: exit FileTag (tray icon → Exit), extract the new zip over the old
 folder, run `FileTag.App.exe` again. Notes and settings are unaffected.
 
+## Recovering an accidentally deleted note
+
+FileTag quietly keeps a tiny local backup of every note it has ever saved —
+gzip-compressed, usually only a few hundred bytes even with heavy use. If you
+delete a note by mistake (past the 5-second undo toast), or a note is lost
+because its file moved somewhere its storage couldn't follow, right-click the
+tray icon → **Recover Notes…**. It lists anything backed-up that no longer
+has a live comment, with the exact text and when it was lost, and a Restore
+button that adds it right back — never overwriting anything already on the
+file.
+
+This backup lives in `%LocalAppData%\FileTag\notes-backup.json.gz` and is
+removed along with everything else on uninstall, same as your notes
+themselves.
+
 ## Uninstalling
 
 **Settings → Apps → FileTag → Uninstall** (or run `Uninstall.exe` from the
@@ -156,6 +171,9 @@ live in a folder that's being deleted).
 
 ## Version history
 
+- **5.4.0** — **Recover Notes**: a compact local backup of every note ever
+  saved (gzip, a few hundred bytes even with heavy use), kept specifically to
+  survive accidental deletes. Restore any backed-up note from the tray menu.
 - **5.1.0** — **Delete with confirm and undo**: a Delete button on the bar,
   inline confirmation (Esc or clicking away always cancels), and a 5-second
   undo toast before anything actually leaves the disk. Translucency fixed —

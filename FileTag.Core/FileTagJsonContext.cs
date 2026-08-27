@@ -8,6 +8,8 @@ namespace FileTag.Core;
 [JsonSerializable(typeof(NoteEntry))]
 [JsonSerializable(typeof(NoteHistory))]
 [JsonSerializable(typeof(IndexStore.IndexData))]
+[JsonSerializable(typeof(NotesBackup.Entry))]
+[JsonSerializable(typeof(List<NotesBackup.Entry>))]
 public sealed partial class FileTagJsonContext : JsonSerializerContext
 {
 }

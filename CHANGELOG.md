@@ -3,6 +3,29 @@
 Record of what was actually implemented, tested, fixed, or deferred per
 release. User-facing notes live in `FileTag.App/Assets/PatchNotes.json`.
 
+## 5.4.0 — 2026-08-28
+- NotesBackup (Core): gzip-compressed local mirror of every note ever saved,
+  written on every StorageRouter.Save; entries survive StorageRouter.Delete
+  (marked deleted, not erased) — that's the entire point of a last-resort
+  backup. ~200 bytes per real entry observed in practice.
+- RecoverNotesWindow (tray → "Recover Notes…"): lists backup entries whose
+  file still exists but has no live comment right now; Restore re-saves the
+  text (non-destructive — appends to history like any normal save).
+- Startup backfill: mirrors every currently-indexed note into the backup once
+  per launch (background thread), so pre-existing notes get protected too.
+- Uninstall now also removes notes-backup.json.gz (consistent with "strips
+  everything" — uninstall already deliberately erases all live notes).
+- Test isolation fix: NotesBackup.SetPathForTesting added and the console
+  suite now redirects for its ENTIRE run, not partway through — an earlier
+  version of this change briefly leaked temp-test entries into the real
+  %LocalAppData%\FileTag\notes-backup.json.gz on this dev machine before
+  the fix; cleaned up, verified a clean re-run touches zero real files.
+- Verified with a full live cycle through the real UI: delete a note, confirm,
+  wait out the 5s grace period so it truly commits, open Recover Notes, see
+  the exact text and deletion time, click Restore, confirm the note is back
+  on the actual file and re-indexed. 75 storage-suite checks green (64 + 11
+  new backup tests).
+
 ## 5.3.0 — 2026-07-27
 - Patch Notes system: embedded `PatchNotes.json` (App + Setup), `PatchNotesWindow`
   ("What's New" in tray menu), filtered "what's new since vX" on Setup's update

@@ -82,7 +82,7 @@ internal sealed class UninstallRunner
         {
             // File-specific, never recursive: the data dir can coincide with the
             // install dir (default setup location) or contain user files.
-            foreach (string f in new[] { "index.json", "debug.log" })
+            foreach (string f in new[] { "index.json", "debug.log", "notes-backup.json.gz" })
             {
                 string p = Path.Combine(IndexStore.DataDirectory, f);
                 if (File.Exists(p)) File.Delete(p);
@@ -132,7 +132,7 @@ internal sealed class UninstallRunner
     /// folder itself is removed only if it is empty afterwards.</summary>
     private static readonly string[] OwnedFiles =
         ["FileTag.App.exe", "Uninstall.exe", "README.txt", "LICENSE.txt", "README.md",
-         "debug.log", "index.json", PendingDeletionSentinel];
+         "debug.log", "index.json", "notes-backup.json.gz", PendingDeletionSentinel];
 
     /// <summary>Deletes FileTag's own files (and the folder, only if then empty)
     /// after this process exits — and only if the sentinel still exists at fire
