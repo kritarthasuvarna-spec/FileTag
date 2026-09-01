@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>5.6.0</Version>
+    <Version>5.7.0</Version>
     <AssemblyName>FootNote.Setup</AssemblyName>
     <ApplicationIcon>..\FootNote.App\footnote.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -21,6 +21,8 @@
     <Resource Include="..\FootNote.App\Assets\footnote_demo.gif" Link="Assets\footnote_demo.gif" />
     <EmbeddedResource Include="..\FootNote.App\Assets\PatchNotes.json" Link="Assets\PatchNotes.json" />
     <Compile Include="..\FootNote.App\PatchNotes.cs" Link="PatchNotes.cs" />
+    <Compile Include="..\FootNote.App\DarkTitleBar.cs" Link="DarkTitleBar.cs" />
+    <Resource Include="..\FootNote.App\Assets\Fonts\*.ttf" Link="Assets\Fonts\%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

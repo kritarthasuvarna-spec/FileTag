@@ -1,4 +1,6 @@
 [
+  { "version": "5.7.0", "notes": [
+    "New look: a cleaner font throughout the app and installer, and the Setup window's title bar and buttons now match the rest of its dark theme." ] },
   { "version": "5.6.0", "notes": [
     "FileTag is now FootNote! Same app, new name - your notes, settings, and everything else carry over automatically, no action needed." ] },
   { "version": "5.5.0", "notes": [

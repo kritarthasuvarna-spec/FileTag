@@ -48,6 +48,7 @@ public partial class OverlayBar : Window
     public OverlayBar()
     {
         InitializeComponent();
+        FootNote.App.DarkTitleBar.Apply(this);
         SourceInitialized += (_, _) =>
         {
             _hwnd = new WindowInteropHelper(this).Handle;

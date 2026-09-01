@@ -14,6 +14,7 @@ public partial class SetupWindow : Window
     public SetupWindow()
     {
         InitializeComponent();
+        FootNote.App.DarkTitleBar.Apply(this);
         DirBox.Text = _vm.InstallDir;
         _vm.PropertyChanged += (_, _) => Dispatcher.BeginInvoke(() =>
         {

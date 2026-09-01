@@ -3,6 +3,26 @@
 Record of what was actually implemented, tested, fixed, or deferred per
 release. User-facing notes live in `FootNote.App/Assets/PatchNotes.json`.
 
+## 5.7.0 — 2026-09-01
+- App-wide font switched from the unset WPF default (Tahoma/MS Shell Dlg —
+  no FontFamily was ever set) to Manrope, embedded as two static weights
+  (Regular + Bold, sharing one family name so WPF's FontWeight resolves
+  between them) at FootNote.App/Assets/Fonts. Applied via an implicit
+  Application-level Style targeting Window, so it cascades to every WPF
+  window through property inheritance without touching individual XAML
+  files. FootNote.Setup links the same font files rather than duplicating
+  them (matching its existing pattern for the demo GIF and patch notes).
+  Scope: WPF windows only — the WinForms tray ContextMenuStrip stays on
+  the system font, which is normal for native tray menus.
+- DarkTitleBar.cs (App, linked into Setup): every window now calls
+  DwmSetWindowAttribute(DWMWA_USE_IMMERSIVE_DARK_MODE) right after
+  InitializeComponent, fixing the light/white native title bar that
+  previously sat on top of every dark-themed window.
+- Setup wizard: buttons and the install-location text box got real
+  ControlTemplates (8px/6px rounded corners, hover/press opacity) instead
+  of the unstyled default WPF chrome, matching the 10px-rounded Card style
+  used everywhere else in the wizard.
+
 ## 5.6.0 — 2026-09-01
 - Product rebrand: FileTag → FootNote. All projects, namespaces, assemblies,
   the solution file, icons, and documentation renamed. 🏷 swapped to 📝

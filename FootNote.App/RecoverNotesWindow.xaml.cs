@@ -22,6 +22,7 @@ public partial class RecoverNotesWindow : Window
     public RecoverNotesWindow(Action<string> onRestored)
     {
         InitializeComponent();
+        FootNote.App.DarkTitleBar.Apply(this);
         _onRestored = onRestored;
         Populate();
     }

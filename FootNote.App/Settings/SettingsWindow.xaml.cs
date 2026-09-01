@@ -18,6 +18,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow(SettingsViewModel vm)
     {
         InitializeComponent();
+        FootNote.App.DarkTitleBar.Apply(this);
         DataContext = _vm = vm;
 
         foreach (string hex in Swatches)

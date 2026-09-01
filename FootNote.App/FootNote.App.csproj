@@ -7,7 +7,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>5.6.0</Version>
+    <Version>5.7.0</Version>
     <ApplicationIcon>footnote.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyTitle>FootNote</AssemblyTitle>
@@ -26,6 +26,7 @@
     <!-- embedded, never fetched over the network -->
     <Resource Include="Assets\footnote_demo.gif" />
     <EmbeddedResource Include="Assets\PatchNotes.json" />
+    <Resource Include="Assets\Fonts\*.ttf" />
   </ItemGroup>
 
 </Project>

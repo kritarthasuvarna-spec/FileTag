@@ -13,6 +13,7 @@ public partial class PatchNotesWindow : Window
     public PatchNotesWindow(Version? sinceExclusive = null)
     {
         InitializeComponent();
+        FootNote.App.DarkTitleBar.Apply(this);
         var dim = new SolidColorBrush(Color.FromRgb(0x9B, 0x9B, 0xA8));
         var text = new SolidColorBrush(Color.FromRgb(0xF2, 0xF2, 0xF7));
         foreach (var (version, notes) in PatchNotes.Load(Assembly.GetExecutingAssembly(), sinceExclusive))

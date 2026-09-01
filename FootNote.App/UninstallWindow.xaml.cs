@@ -18,6 +18,7 @@ public partial class UninstallWindow : Window
     public UninstallWindow()
     {
         InitializeComponent();
+        FootNote.App.DarkTitleBar.Apply(this);
         int n = _runner.TaggedFileCount;
         ConfirmText.Text =
             $"This will remove FootNote and delete comments from {n} tagged file{(n == 1 ? "" : "s")}, " +

@@ -15,6 +15,7 @@ public partial class TutorialWindow : Window
     public TutorialWindow()
     {
         InitializeComponent();
+        FootNote.App.DarkTitleBar.Apply(this);
         HotkeyChip.Text = Settings.SettingsService.Instance.Current.HotkeyDisplay.Replace("+", " + ");
     }
 
