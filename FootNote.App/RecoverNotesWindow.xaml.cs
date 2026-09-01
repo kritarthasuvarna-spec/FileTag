@@ -72,7 +72,7 @@ public partial class RecoverNotesWindow : Window
                 ? $"Deleted {d.ToLocalTime():d MMM yyyy, HH:mm}"
                 : $"Last saved {latest.At.ToLocalTime():d MMM yyyy, HH:mm} — no longer on the file";
 
-            var row = new DockPanel();
+            var row = new DockPanel { LastChildFill = false };
             row.Children.Add(new TextBlock
             {
                 Text = when, FontSize = 11, Foreground = dim, VerticalAlignment = VerticalAlignment.Center,

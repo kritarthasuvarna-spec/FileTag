@@ -1,4 +1,8 @@
 [
+  { "version": "5.7.1", "notes": [
+    "Fixed a Recover Notes layout bug where the Restore button could overlap the note's timestamp.",
+    "Setup no longer shows the demo animation on a failed install or update.",
+    "Rounded buttons and a matching dark scrollbar throughout every window." ] },
   { "version": "5.7.0", "notes": [
     "New look: a cleaner font throughout the app and installer, and the Setup window's title bar and buttons now match the rest of its dark theme." ] },
   { "version": "5.6.0", "notes": [

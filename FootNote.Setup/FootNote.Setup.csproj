@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>5.7.0</Version>
+    <Version>5.7.1</Version>
     <AssemblyName>FootNote.Setup</AssemblyName>
     <ApplicationIcon>..\FootNote.App\footnote.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>

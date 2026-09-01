@@ -48,6 +48,7 @@ public partial class SetupWindow : Window
         {
             FinishTitle.Text = "Update failed";
             FinishText.Text = $"{_vm.FailureMessage}\n\nDetails: {FootNote.Core.Logger.InstallLogPath}";
+            FinishGif.Visibility = Visibility.Collapsed; // a failure screen shouldn't show the celebratory demo
         }
         else
         {
@@ -135,6 +136,7 @@ public partial class SetupWindow : Window
                 {
                     FinishTitle.Text = "Setup failed";
                     FinishText.Text = $"{_vm.FailureMessage}\n\nDetails: {FootNote.Core.Logger.InstallLogPath}";
+                    FinishGif.Visibility = Visibility.Collapsed; // a failure screen shouldn't show the celebratory demo
                 }
                 ShowScreen(4);
                 break;

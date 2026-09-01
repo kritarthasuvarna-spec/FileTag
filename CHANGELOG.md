@@ -3,6 +3,33 @@
 Record of what was actually implemented, tested, fixed, or deferred per
 release. User-facing notes live in `FootNote.App/Assets/PatchNotes.json`.
 
+## 5.7.1 — 2026-09-01
+- Full UI pass across every window (Setup, Settings, Tutorial, What's New,
+  Recover Notes, Uninstall), driven by real screenshots rather than reading
+  XAML alone:
+  - RecoverNotesWindow.xaml.cs: fixed a real layout bug — the per-entry row
+    was a DockPanel with its default LastChildFill="True", which made the
+    Restore button (last child, despite Dock="Right") fill the remaining
+    width and sit on top of the "Last saved ..." text instead of docking
+    right. Set LastChildFill="False" so both children respect their Dock.
+  - SetupWindow.xaml.cs: the Finish screen kept showing the celebratory
+    demo GIF even when install/update failed. Now collapsed whenever
+    _succeeded is false, in both the fresh-install and update paths.
+  - Centralized a single rounded, hover-responsive Button style at
+    Application level (FootNote.App/App.xaml) so every secondary window
+    picks it up automatically instead of falling back to WPF's flat
+    default — removed the one window-local style that was shadowing it
+    (UninstallWindow) and added BasedOn to RecoverNotesWindow's RestoreBtn
+    so it inherits the rounded template too.
+  - Added a matching thin dark ScrollBar style at Application level (both
+    App and Setup) — What's New and Recover Notes were the only windows
+    with scrollable content, and both were rendering the stock light-gray
+    Windows scrollbar against the dark theme.
+- Removed stale test data two ways: a leftover ADS note + backup entry on
+  demo/report.txt from the earlier rebrand-migration testing that was
+  visibly polluting the real Recover Notes list, and the throwaway file
+  used to verify the RecoverNotesWindow fix.
+
 ## 5.7.0 — 2026-09-01
 - App-wide font switched from the unset WPF default (Tahoma/MS Shell Dlg —
   no FontFamily was ever set) to Manrope, embedded as two static weights

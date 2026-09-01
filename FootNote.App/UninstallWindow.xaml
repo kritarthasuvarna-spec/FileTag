@@ -10,13 +10,6 @@
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource Text}"/>
         </Style>
-        <Style TargetType="Button">
-            <Setter Property="Padding" Value="16,7"/>
-            <Setter Property="Margin" Value="8,0,0,0"/>
-            <Setter Property="Background" Value="#3D3D4D"/>
-            <Setter Property="Foreground" Value="{StaticResource Text}"/>
-            <Setter Property="BorderThickness" Value="0"/>
-        </Style>
     </Window.Resources>
 
     <Grid Margin="24">
@@ -32,7 +25,7 @@
                        Foreground="{StaticResource Dim}" Margin="0,14,0,0" LineHeight="20"/>
             <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Cancel" Click="Cancel_Click"/>
-                <Button x:Name="UninstallBtn" Content="Uninstall" Background="#C24242" Click="Uninstall_Click"/>
+                <Button x:Name="UninstallBtn" Content="Uninstall" Background="#C24242" Margin="8,0,0,0" Click="Uninstall_Click"/>
             </StackPanel>
         </Grid>
 

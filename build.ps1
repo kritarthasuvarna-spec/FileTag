@@ -1,6 +1,6 @@
 # FootNote release build: publishes self-contained binaries, produces the
 # distributable zip AND the Setup wizard exe in .\dist\
-param([string]$Version = "5.7.0")
+param([string]$Version = "5.7.1")
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
