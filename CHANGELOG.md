@@ -3,6 +3,16 @@
 Record of what was actually implemented, tested, fixed, or deferred per
 release. User-facing notes live in `FootNote.App/Assets/PatchNotes.json`.
 
+## 5.7.2 — 2026-09-01
+- Setup's "already installed" screen was calling a genuine pre-rebrand
+  FileTag install "FootNote vX.X.X is already installed" — confusing for
+  anyone actually upgrading from FileTag, since that name never applied
+  to their install. SetupViewModel now records which registry name
+  (FootNote or the transitional FileTag) actually matched via a new
+  ExistingName property, and the title uses it instead of hardcoding
+  FootNote. Also fixed a stray double space in the "Update to vX.X.X
+  (recommended)" button text.
+
 ## 5.7.1 — 2026-09-01
 - Full UI pass across every window (Setup, Settings, Tutorial, What's New,
   Recover Notes, Uninstall), driven by real screenshots rather than reading

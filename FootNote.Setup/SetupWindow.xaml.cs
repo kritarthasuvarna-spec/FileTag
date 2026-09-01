@@ -24,10 +24,10 @@ public partial class SetupWindow : Window
 
         if (_vm.DetectExistingInstall())
         {
-            ExistingTitle.Text = $"FootNote v{_vm.ExistingVersion} is already installed";
+            ExistingTitle.Text = $"{_vm.ExistingName} v{_vm.ExistingVersion} is already installed";
             ExistingText.Text = $"Found at {_vm.ExistingLocation}.";
             UpdateBtn.Content = _vm.IsUpgrade
-                ? $"Update to v{_vm.NewVersion}  (recommended)"
+                ? $"Update to v{_vm.NewVersion} (recommended)"
                 : $"Reinstall v{_vm.NewVersion} over it";
             ShowScreen(-1);
         }

@@ -1,4 +1,6 @@
 [
+  { "version": "5.7.2", "notes": [
+    "Setup now correctly says \"FileTag\" (not \"FootNote\") when it detects a pre-rebrand install." ] },
   { "version": "5.7.1", "notes": [
     "Fixed a Recover Notes layout bug where the Restore button could overlap the note's timestamp.",
     "Setup no longer shows the demo animation on a failed install or update.",

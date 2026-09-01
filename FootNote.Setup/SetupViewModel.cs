@@ -29,7 +29,11 @@ public sealed class SetupViewModel : INotifyPropertyChanged
     public string NewVersion { get; } =
         typeof(SetupViewModel).Assembly.GetName().Version?.ToString(3) ?? "0.0.0";
 
-    /// <summary>Reads the Apps &amp; Features key. True if a usable install exists.</summary>
+    /// <summary>The name the existing install is registered under — "FootNote" or,
+    /// transitionally, the old "FileTag" — so the UI can refer to it correctly
+    /// instead of calling a pre-rebrand install "FootNote".</summary>
+    public string ExistingName { get; private set; } = "FootNote";
+
     /// <summary>True if a FootNote install exists, or — transitionally — an old
     /// FileTag install (this app's previous name) that Update should recognize
     /// and take over rather than leaving orphaned alongside a fresh install.</summary>
@@ -47,6 +51,7 @@ public sealed class SetupViewModel : INotifyPropertyChanged
                 if (string.IsNullOrEmpty(loc) || !Directory.Exists(loc)) return false;
                 ExistingLocation = loc;
                 ExistingVersion = key?.GetValue("DisplayVersion") as string ?? "?";
+                ExistingName = keyName;
                 return true;
             }
             catch { return false; }
