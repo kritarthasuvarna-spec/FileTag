@@ -1,6 +1,6 @@
 # FileTag release build: publishes self-contained binaries, produces the
 # distributable zip AND the Setup wizard exe in .\dist\
-param([string]$Version = "5.4.0")
+param([string]$Version = "5.5.0")
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
@@ -12,10 +12,13 @@ foreach ($d in @($appOut, (Join-Path $out "uninstall"), (Join-Path $out "setup")
     if (Test-Path $d) { Remove-Item $d -Recurse -Force }
 }
 
-Write-Host "Publishing FileTag.App (self-contained, single file, compressed)..."
-dotnet publish FileTag.App -c Release -r win-x64 --self-contained true `
-    -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
-    -p:EnableCompressionInSingleFile=true `
+Write-Host "Publishing FileTag.App (framework-dependent, single file)..."
+# Framework-dependent, not self-contained: relies on the .NET 8 Desktop Runtime
+# already being on the machine (FileTag.Setup detects/installs it if missing —
+# Setup itself STAYS self-contained below, precisely so it can run that check
+# on a bare machine with nothing installed yet).
+dotnet publish FileTag.App -c Release -r win-x64 --self-contained false `
+    -p:PublishSingleFile=true `
     -p:Version=$Version -o $appOut
 if ($LASTEXITCODE -ne 0) { throw "App publish failed" }
 

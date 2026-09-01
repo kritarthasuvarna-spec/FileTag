@@ -1,4 +1,7 @@
 [
+  { "version": "5.5.0", "notes": [
+    "Much smaller download - the installer shrank from 69MB to under 6MB.",
+    "If a required Windows component is missing, Setup now downloads and installs it automatically as part of setup." ] },
   { "version": "5.4.0", "notes": [
     "New: Recover Notes (tray menu). FileTag now keeps a tiny local backup of every note - if you delete one by mistake, you can get it back.",
     "Fixed a bug where a deleted note could reappear if you reselected the file within a few seconds." ] },

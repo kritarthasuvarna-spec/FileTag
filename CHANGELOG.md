@@ -3,6 +3,34 @@
 Record of what was actually implemented, tested, fixed, or deferred per
 release. User-facing notes live in `FileTag.App/Assets/PatchNotes.json`.
 
+## 5.5.0 — 2026-09-01
+- FileTag.App switched from self-contained to framework-dependent publish
+  (build.ps1: `--self-contained false`, dropped EnableCompressionInSingleFile/
+  IncludeNativeLibrariesForSelfExtract which only apply to self-contained).
+  Result: portable zip 68.7MB -> 5.8MB, FileTag.App.exe itself 0.82MB.
+  FileTag.Setup and Uninstall.exe deliberately stay self-contained — Setup
+  has to be runnable on a bare machine with nothing installed, before it can
+  even check what App.exe needs.
+- RuntimeInstaller.cs (Setup): detects Microsoft.WindowsDesktop.App 8.x via
+  %ProgramFiles%\dotnet\shared; if missing, downloads the official evergreen
+  installer (aka.ms/dotnet/8.0/windowsdesktop-runtime-win-x64.exe) with live
+  byte-progress, runs it silently (/install /quiet /norestart), and only
+  then proceeds — visible step in the UI, no manual download required from
+  the user (explicit user decision: transparent but automatic, not silent-
+  and-hidden, not a manual redirect-and-stop).
+  Test hook: FILETAG_FORCE_RUNTIME_MISSING=1 forces the download path
+  without touching the real installed runtime.
+- Setup progress bar reworked to a continuous 0-25% band for the runtime
+  check/download/install, remaining 5 steps evenly splitting 25-100%.
+- Verified for real, not simulated: normal install with runtime present
+  (near-instant skip, confirmed via install.log); forced-missing path
+  actually downloaded and silently ran the real windowsdesktop-runtime
+  installer end to end (exit code 0, ~3.5 min real-world, logged); app
+  launches and the full passive-display/hotkey pipeline still works
+  correctly post-switch (UI Automation + WPF unaffected by the publish
+  mode change). 75 storage-suite checks still green (untouched by this
+  change — Core wasn't touched).
+
 ## 5.4.0 — 2026-08-28
 - NotesBackup (Core): gzip-compressed local mirror of every note ever saved,
   written on every StorageRouter.Save; entries survive StorageRouter.Delete

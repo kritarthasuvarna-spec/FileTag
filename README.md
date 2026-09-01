@@ -171,6 +171,10 @@ live in a folder that's being deleted).
 
 ## Version history
 
+- **5.5.0** — The installer got 90%+ smaller (68.7MB → 5.8MB portable, app
+  itself is 0.8MB). FileTag now relies on the .NET 8 Desktop Runtime already
+  on your PC — if it's missing, Setup downloads and installs it automatically
+  (one clearly-labeled step, no separate download needed from you).
 - **5.4.0** — **Recover Notes**: a compact local backup of every note ever
   saved (gzip, a few hundred bytes even with heavy use), kept specifically to
   survive accidental deletes. Restore any backed-up note from the tray menu.

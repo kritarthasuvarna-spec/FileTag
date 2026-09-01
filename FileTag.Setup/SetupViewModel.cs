@@ -81,11 +81,24 @@ public sealed class SetupViewModel : INotifyPropertyChanged
         Logger.Info($"install started — target: {InstallDir}, startup: {LaunchOnStartup}");
         try
         {
-            await Step(1, "Copying files…", ExtractPayload);
-            await Step(2, "Registering startup entry…", RegisterStartup);
-            await Step(3, "Creating Start Menu shortcut…", CreateStartMenuShortcut);
-            await Step(4, "Detecting Google Drive / OneDrive folders…", DetectCloudFolders);
-            await Step(5, "Writing Apps & Features entry…", WriteUninstallEntry);
+            // The runtime check gets its own generous band (0-25%) with continuous
+            // sub-progress during download — everything else is a discrete step
+            // reported only once its work actually completed.
+            CurrentStep = "Checking for the .NET Runtime…";
+            Notify();
+            await RuntimeInstaller.EnsureInstalledAsync((pct, label) =>
+            {
+                CurrentStep = label;
+                ProgressValue = pct * 0.25;
+                Notify();
+            });
+            Logger.Info("step ok: .NET Runtime present");
+
+            await Step(1, 5, "Copying files…", ExtractPayload);
+            await Step(2, 5, "Registering startup entry…", RegisterStartup);
+            await Step(3, 5, "Creating Start Menu shortcut…", CreateStartMenuShortcut);
+            await Step(4, 5, "Detecting Google Drive / OneDrive folders…", DetectCloudFolders);
+            await Step(5, 5, "Writing Apps & Features entry…", WriteUninstallEntry);
             CurrentStep = "Done";
             ProgressValue = 100;
             Notify();
@@ -101,10 +114,11 @@ public sealed class SetupViewModel : INotifyPropertyChanged
         }
     }
 
-    private async Task Step(int number, string label, Action work)
+    /// <summary>Steps after the runtime check evenly split the remaining 75% of the bar.</summary>
+    private async Task Step(int number, int totalAfterRuntime, string label, Action work)
     {
         CurrentStep = label;
-        ProgressValue = (number - 1) * 20;
+        ProgressValue = 25 + (number - 1) * (75.0 / totalAfterRuntime);
         Notify();
         await Task.Run(work);
         Logger.Info($"step ok: {label}");
