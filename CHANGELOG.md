@@ -1,14 +1,45 @@
 # Changelog (dev-facing)
 
 Record of what was actually implemented, tested, fixed, or deferred per
-release. User-facing notes live in `FileTag.App/Assets/PatchNotes.json`.
+release. User-facing notes live in `FootNote.App/Assets/PatchNotes.json`.
+
+## 5.6.0 — 2026-09-01
+- Product rebrand: FileTag → FootNote. All projects, namespaces, assemblies,
+  the solution file, icons, and documentation renamed. 🏷 swapped to 📝
+  throughout the UI.
+- Storage identifiers renamed too, not just branding: ADS stream
+  `FileTag.txt` → `FootNote.txt`, sidecar suffix `.filetag` → `.footnote`.
+  Both backends (AdsHelper, SidecarHelper) keep read-fallback to the legacy
+  name plus a `MigrateLegacy()` that renames a found legacy stream/sidecar
+  to the new name — exposed per-file via `StorageRouter.MigrateLegacy`.
+- RebrandMigration.cs (Core, new): one-time move of
+  `%LocalAppData%\FileTag` → `...\FootNote` and `%AppData%\FileTag` →
+  `...\FootNote` (settings, index, notes-backup, logs all travel intact),
+  plus cleanup of the old per-user registry entries (Run value, Apps &
+  Features key) once the new ones are written. Runs as the literal first
+  statement in both App.xaml.cs OnStartup and SetupViewModel.RunAsync —
+  before Logger.Init, which would otherwise create the new folder first
+  and make the migration think there was nothing to move.
+  `Directory.Move` retries briefly (5x, 300ms) before falling back to
+  copy+delete, to ride out a transient file-handle release race right
+  after the previous build's process exits.
+- Setup: existing-install detection, the Update path's registry reads, and
+  StopRunningApp all transitionally recognize both "FootNote" and the old
+  "FileTag" naming, so an in-place update over a real FileTag install is
+  detected as an upgrade (not a fresh side-by-side install) and the old
+  build is asked to exit gracefully before Setup touches its files.
+- Verified for real against genuine pre-rebrand user data (real settings
+  with non-default values, real index entries, a real ADS-stream note):
+  full launch-time migration correctly moved both data folders, preserved
+  settings and index content exactly, migrated the per-file note, and left
+  no legacy folders or streams behind.
 
 ## 5.5.0 — 2026-09-01
-- FileTag.App switched from self-contained to framework-dependent publish
+- FootNote.App switched from self-contained to framework-dependent publish
   (build.ps1: `--self-contained false`, dropped EnableCompressionInSingleFile/
   IncludeNativeLibrariesForSelfExtract which only apply to self-contained).
-  Result: portable zip 68.7MB -> 5.8MB, FileTag.App.exe itself 0.82MB.
-  FileTag.Setup and Uninstall.exe deliberately stay self-contained — Setup
+  Result: portable zip 68.7MB -> 5.8MB, FootNote.App.exe itself 0.82MB.
+  FootNote.Setup and Uninstall.exe deliberately stay self-contained — Setup
   has to be runnable on a bare machine with nothing installed, before it can
   even check what App.exe needs.
 - RuntimeInstaller.cs (Setup): detects Microsoft.WindowsDesktop.App 8.x via
@@ -18,7 +49,7 @@ release. User-facing notes live in `FileTag.App/Assets/PatchNotes.json`.
   then proceeds — visible step in the UI, no manual download required from
   the user (explicit user decision: transparent but automatic, not silent-
   and-hidden, not a manual redirect-and-stop).
-  Test hook: FILETAG_FORCE_RUNTIME_MISSING=1 forces the download path
+  Test hook: FOOTNOTE_FORCE_RUNTIME_MISSING=1 forces the download path
   without touching the real installed runtime.
 - Setup progress bar reworked to a continuous 0-25% band for the runtime
   check/download/install, remaining 5 steps evenly splitting 25-100%.
@@ -46,7 +77,7 @@ release. User-facing notes live in `FileTag.App/Assets/PatchNotes.json`.
 - Test isolation fix: NotesBackup.SetPathForTesting added and the console
   suite now redirects for its ENTIRE run, not partway through — an earlier
   version of this change briefly leaked temp-test entries into the real
-  %LocalAppData%\FileTag\notes-backup.json.gz on this dev machine before
+  %LocalAppData%\FootNote\notes-backup.json.gz on this dev machine before
   the fix; cleaned up, verified a clean re-run touches zero real files.
 - Verified with a full live cycle through the real UI: delete a note, confirm,
   wait out the 5s grace period so it truly commits, open Recover Notes, see
@@ -68,11 +99,11 @@ release. User-facing notes live in `FileTag.App/Assets/PatchNotes.json`.
 ## 5.2.0 — 2026-07-27
 - Existing-install detection in Setup (registry DisplayVersion/InstallLocation);
   Update-in-place locked to registry folder; silent /S updates in place.
-- Graceful app shutdown via named event `FileTag.App.ExitRequest`; kill fallback.
+- Graceful app shutdown via named event `FootNote.App.ExitRequest`; kill fallback.
 - Clean 4-file install layout (app, Uninstall.exe, README.txt, LICENSE.txt from
   install-assets/); Start Menu shortcut (both install paths; removed on uninstall).
 - Tested live: 5.1.0→5.2.0 update in place, graceful-exit signal, layout, shortcut.
-- Deviation: exe stays `FileTag.App.exe` (spec says FileTag.exe) — rename ripples
+- Deviation: exe stays `FootNote.App.exe` (spec says FootNote.exe) — rename ripples
   through stub/process checks/existing installs for cosmetic gain.
 
 ## 5.1.0 — 2026-07-19
@@ -95,17 +126,17 @@ release. User-facing notes live in `FileTag.App/Assets/PatchNotes.json`.
 - 4.2.1: bar always follows selection; clean edits released, dirty protected.
 
 ## 4.1.x — 2026-07-18/19
-- 4.1.0: one-time `_FileTag_ReadMe.txt` at cloud sync roots (Google letter-mounts
+- 4.1.0: one-time `_FootNote_ReadMe.txt` at cloud sync roots (Google letter-mounts
   target "My Drive"); documented cloud-detection graceful degradation.
-- 4.1.1: manifest-based uninstall cleanup — only FileTag-owned files deleted,
+- 4.1.1: manifest-based uninstall cleanup — only FootNote-owned files deleted,
   folder removed only if empty; data-dir cleanup file-specific.
 
 ## 4.0.0 — 2026-07-15
 - Shared Logger (Core): `timestamp | LEVEL | component | message`; rolling app
   log (~7 days/5MB); install.log; uninstall log in %TEMP%; tray "Open logs folder".
-- FileTag.Setup wizard (embedded payload zip; /S silent; WPF single-file needs
+- FootNote.Setup wizard (embedded payload zip; /S silent; WPF single-file needs
   IncludeNativeLibrariesForSelfExtract — crashes 0xC000041D without it).
-- Uninstall wizard hosted in `FileTag.App --uninstall` (Uninstall.exe = stub).
+- Uninstall wizard hosted in `FootNote.App --uninstall` (Uninstall.exe = stub).
 - Sentinel-guarded scheduled folder deletion (reinstall race fix); relocation
   balloon; second-instance message.
 

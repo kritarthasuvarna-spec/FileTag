@@ -1,6 +1,6 @@
-# FileTag release build: publishes self-contained binaries, produces the
+# FootNote release build: publishes self-contained binaries, produces the
 # distributable zip AND the Setup wizard exe in .\dist\
-param([string]$Version = "5.5.0")
+param([string]$Version = "5.6.0")
 
 $ErrorActionPreference = "Stop"
 Set-Location $PSScriptRoot
@@ -12,19 +12,19 @@ foreach ($d in @($appOut, (Join-Path $out "uninstall"), (Join-Path $out "setup")
     if (Test-Path $d) { Remove-Item $d -Recurse -Force }
 }
 
-Write-Host "Publishing FileTag.App (framework-dependent, single file)..."
+Write-Host "Publishing FootNote.App (framework-dependent, single file)..."
 # Framework-dependent, not self-contained: relies on the .NET 8 Desktop Runtime
-# already being on the machine (FileTag.Setup detects/installs it if missing —
+# already being on the machine (FootNote.Setup detects/installs it if missing —
 # Setup itself STAYS self-contained below, precisely so it can run that check
 # on a bare machine with nothing installed yet).
-dotnet publish FileTag.App -c Release -r win-x64 --self-contained false `
+dotnet publish FootNote.App -c Release -r win-x64 --self-contained false `
     -p:PublishSingleFile=true `
     -p:Version=$Version -o $appOut
 if ($LASTEXITCODE -ne 0) { throw "App publish failed" }
 
 Write-Host "Publishing Uninstall.exe (stub, self-contained, trimmed)..."
 $unOut = Join-Path $out "uninstall"
-dotnet publish FileTag.Uninstaller -c Release -r win-x64 --self-contained true `
+dotnet publish FootNote.Uninstaller -c Release -r win-x64 --self-contained true `
     -p:PublishSingleFile=true -p:PublishTrimmed=true -p:TrimMode=partial `
     -p:Version=$Version -o $unOut
 if ($LASTEXITCODE -ne 0) { throw "Uninstaller publish failed" }
@@ -36,21 +36,21 @@ Copy-Item (Join-Path $PSScriptRoot "install-assets\LICENSE.txt") $appOut
 Remove-Item $unOut -Recurse -Force
 Get-ChildItem $appOut -Filter *.pdb | Remove-Item
 
-$zip = Join-Path $out "FileTag-v$Version-win-x64.zip"
+$zip = Join-Path $out "FootNote-v$Version-win-x64.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path (Join-Path $appOut "*") -DestinationPath $zip -CompressionLevel Optimal
 
-Write-Host "Publishing FileTag.Setup (wizard with embedded payload)..."
-$payload = Join-Path $PSScriptRoot "FileTag.Setup\payload.zip"
+Write-Host "Publishing FootNote.Setup (wizard with embedded payload)..."
+$payload = Join-Path $PSScriptRoot "FootNote.Setup\payload.zip"
 Copy-Item $zip $payload -Force
 try {
     $setupOut = Join-Path $out "setup"
-    dotnet publish FileTag.Setup -c Release -r win-x64 --self-contained true `
+    dotnet publish FootNote.Setup -c Release -r win-x64 --self-contained true `
         -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true `
         -p:EnableCompressionInSingleFile=true `
         -p:Version=$Version -o $setupOut
     if ($LASTEXITCODE -ne 0) { throw "Setup publish failed" }
-    Copy-Item (Join-Path $setupOut "FileTag.Setup.exe") (Join-Path $out "FileTag-Setup-v$Version.exe") -Force
+    Copy-Item (Join-Path $setupOut "FootNote.Setup.exe") (Join-Path $out "FootNote-Setup-v$Version.exe") -Force
     Remove-Item $setupOut -Recurse -Force
 }
 finally {

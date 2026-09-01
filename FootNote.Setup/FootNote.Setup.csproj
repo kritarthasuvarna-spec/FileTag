@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Version>5.6.0</Version>
+    <AssemblyName>FootNote.Setup</AssemblyName>
+    <ApplicationIcon>..\FootNote.App\footnote.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FootNote.Core\FootNote.Core.csproj" />
+    <!-- payload.zip is placed here by build.ps1 right before publish -->
+    <EmbeddedResource Include="payload.zip" Condition="Exists('payload.zip')" />
+    <PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
+    <!-- same demo GIF + patch notes the app uses; embedded, never fetched -->
+    <Resource Include="..\FootNote.App\Assets\footnote_demo.gif" Link="Assets\footnote_demo.gif" />
+    <EmbeddedResource Include="..\FootNote.App\Assets\PatchNotes.json" Link="Assets\PatchNotes.json" />
+    <Compile Include="..\FootNote.App\PatchNotes.cs" Link="PatchNotes.cs" />
+  </ItemGroup>
+
+</Project>

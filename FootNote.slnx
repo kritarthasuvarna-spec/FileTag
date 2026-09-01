@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="FootNote.App/FootNote.App.csproj" />
+  <Project Path="FootNote.ConsoleTest/FootNote.ConsoleTest.csproj" />
+  <Project Path="FootNote.Core/FootNote.Core.csproj" />
+  <Project Path="FootNote.Setup/FootNote.Setup.csproj" />
+  <Project Path="FootNote.Uninstaller/FootNote.Uninstaller.csproj" />
+</Solution>

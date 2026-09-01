@@ -1,4 +1,4 @@
-# What FileTag Setup needs from you
+# What FootNote Setup needs from you
 
 Everything else from the professionalism audit (button order, path validation,
 rollback, progress checklist, screen transitions, disk-space check, exe
@@ -10,7 +10,7 @@ decisions, and purchases.
 
 ## 1. App icon / logo (recommended)
 
-The current `filetag.ico` is a placeholder I generated with a script early on
+The current `footnote.ico` is a placeholder I generated with a script early on
 — a flat polygon, not a designed mark. It's used in the tray, the taskbar,
 Explorer, and (currently as an emoji stand-in, not the real icon — a bug I'll
 fix either way) the Setup welcome screen. This is the single highest-impact
@@ -20,15 +20,15 @@ visual asset in the whole product.
 
 | File | Spec |
 |---|---|
-| `filetag.ico` | Multi-resolution Windows icon: 16×16, 32×32, 48×48, 256×256, all in one `.ico` file |
-| `filetag-logo.png` | Same mark, standalone, 512×512, transparent background — for the Setup welcome screen and any future marketing use |
+| `footnote.ico` | Multi-resolution Windows icon: 16×16, 32×32, 48×48, 256×256, all in one `.ico` file |
+| `footnote-logo.png` | Same mark, standalone, 512×512, transparent background — for the Setup welcome screen and any future marketing use |
 
 **Design guidance:**
 - Must read clearly at **16×16** (tray icon size) — test it small, not just large. Simple beats detailed here.
 - Current palette: accent blue `#4F8EF7` on dark `#1E1E2B`/`#28283A` backgrounds. Doesn't have to match exactly, but should sit comfortably next to it.
 - Flat or subtly-shaded is fine — no need for photorealism or gradients on a utility-app icon.
 
-**Where it plugs in once you hand it over:** `FileTag.App/filetag.ico`, `FileTag.Setup/filetag.ico` (currently linked from the same file) — I swap the file, everything downstream (tray, taskbar, Explorer, installer) picks it up automatically.
+**Where it plugs in once you hand it over:** `FootNote.App/footnote.ico`, `FootNote.Setup/footnote.ico` (currently linked from the same file) — I swap the file, everything downstream (tray, taskbar, Explorer, installer) picks it up automatically.
 
 ---
 
@@ -43,7 +43,7 @@ Give me:
 - **Publisher / company name** — the exact string to show in Apps & Features "Publisher" and exe "Company". Can be your own name if there's no company entity.
 - **Copyright line** — e.g. `© 2026 [Your Name]`
 - **One-line description** — shown as the exe's "File description" in Explorer. Something like *"Attach personal notes to any file"* works, or write your own.
-- **Website / contact URL** — shown as "Visit website" in Apps & Features. The GitHub repo (`https://github.com/kritarthasuvarna-spec/FileTag`) works fine if you don't have a separate site.
+- **Website / contact URL** — shown as "Visit website" in Apps & Features. The GitHub repo (`https://github.com/kritarthasuvarna-spec/FootNote`) works fine if you don't have a separate site.
 
 ---
 

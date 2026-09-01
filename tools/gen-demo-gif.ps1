@@ -1,10 +1,10 @@
-# Generates Assets\filetag_demo.gif — a short mock animation of the FileTag
+# Generates Assets\footnote_demo.gif — a short mock animation of the FootNote
 # flow (select file -> hotkey -> bar slides up -> type -> saved). Pure GDI+,
 # no external tools. Animated GIF via GDI+ multiframe SaveAdd.
 Add-Type -AssemblyName System.Drawing
 
 $W = 640; $H = 360
-$out = Join-Path $PSScriptRoot '..\FileTag.App\Assets\filetag_demo.gif'
+$out = Join-Path $PSScriptRoot '..\FootNote.App\Assets\footnote_demo.gif'
 New-Item -ItemType Directory -Force (Split-Path $out) | Out-Null
 
 function New-Frame {
@@ -38,7 +38,7 @@ function New-Frame {
         $barY = 288 + $BarOffset
         $bar = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(250,30,30,43))
         $g.FillRectangle($bar, 90, $barY, 460, 60)
-        $g.DrawString('🏷 report.docx', (New-Object System.Drawing.Font('Segoe UI', 9, [System.Drawing.FontStyle]::Bold)),
+        $g.DrawString('📝 report.docx', (New-Object System.Drawing.Font('Segoe UI', 9, [System.Drawing.FontStyle]::Bold)),
             [System.Drawing.Brushes]::White, 102, ($barY + 6))
         if ($Mode -eq 'edit') {
             $g.FillRectangle((New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255,61,61,77))), 102, ($barY + 26), 340, 24)

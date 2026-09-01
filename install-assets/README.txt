@@ -1,4 +1,4 @@
-FileTag - quick reference
+FootNote - quick reference
 ==========================
 
 WHAT IT DOES
@@ -18,19 +18,19 @@ TRAY MENU (right-click the tag icon)
   Open logs folder  |  Exit
 
 RECOVERING A DELETED NOTE
-  FileTag keeps a tiny local backup (gzip, usually a few hundred bytes) of
+  FootNote keeps a tiny local backup (gzip, usually a few hundred bytes) of
   every note it has ever saved, specifically so an accidental delete is
   recoverable. Tray menu -> Recover Notes... lists anything backed up that
   no longer has a live comment, with a one-click Restore.
 
 WHERE THINGS LIVE
   This folder ............. the app and its uninstaller only
-  Settings ................ %APPDATA%\FileTag\settings.json
-  Logs .................... %APPDATA%\FileTag\logs
+  Settings ................ %APPDATA%\FootNote\settings.json
+  Logs .................... %APPDATA%\FootNote\logs
   Your notes .............. inside/next to the files you tagged - never here
 
 UNINSTALL
-  Windows Settings -> Apps -> FileTag -> Uninstall (or Uninstall.exe here).
+  Windows Settings -> Apps -> FootNote -> Uninstall (or Uninstall.exe here).
   Removes the app AND strips every note it created; your files themselves
   are never touched.
 

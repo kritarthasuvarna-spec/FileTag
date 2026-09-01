@@ -1,4 +1,4 @@
-<title>FileTag — Product Document</title>
+<title>FootNote — Product Document</title>
 <style>
   :root {
     --accent: #4F8EF7;
@@ -234,7 +234,7 @@
 <main>
 <header class="masthead">
   <div class="eyebrow">Product Document · v4.1.0 · July 2026</div>
-  <h1>🏷 FileTag</h1>
+  <h1>🏷 FootNote</h1>
   <p class="lede">Attach a personal note to any file on your PC — stored invisibly with the file itself, carried through renames and moves, and synced across machines when the file lives in a Google&nbsp;Drive or OneDrive folder.</p>
   <div class="meta-row">
     <span class="chip acc">Windows 10 / 11</span>
@@ -250,22 +250,22 @@
 <section id="overview">
   <h2><span class="no">1</span>Product overview</h2>
   <hr class="h2-rule">
-  <p>Every file system remembers <em>what</em> a file is — none remembers <em>why you kept it</em>. FileTag answers that question in place: select a file, press a hotkey, type a note. Click the file weeks later and the note slides up from the edge of the screen. There is no app window to open, no database to maintain, and nothing for other programs to trip over.</p>
+  <p>Every file system remembers <em>what</em> a file is — none remembers <em>why you kept it</em>. FootNote answers that question in place: select a file, press a hotkey, type a note. Click the file weeks later and the note slides up from the edge of the screen. There is no app window to open, no database to maintain, and nothing for other programs to trip over.</p>
 
   <h3>Design principles</h3>
   <div class="grid2">
     <div class="card"><h4>The note lives with the file</h4><p>Notes are stored in the file's own NTFS alternate data stream, or in a hidden companion file where streams can't survive. No central store means no orphaned records and no re-linking logic — a rename or move simply carries the note along.</p></div>
     <div class="card"><h4>Invisible until it has something to say</h4><p>Files without notes never trigger anything. The overlay bar appears only when a selected file actually has a note, and the hotkey is the only way a first note gets created.</p></div>
-    <div class="card"><h4>The file is never touched</h4><p>Content, size as apps see it, and the modified timestamp are all preserved — FileTag captures and restores file times around every stream write. Every application opens the file exactly as before.</p></div>
-    <div class="card"><h4>Leaves nothing behind</h4><p>Uninstall strips every note FileTag ever created, from both storage backends, and removes all registry entries and local data. No orphaned hidden data with no app left to manage it.</p></div>
+    <div class="card"><h4>The file is never touched</h4><p>Content, size as apps see it, and the modified timestamp are all preserved — FootNote captures and restores file times around every stream write. Every application opens the file exactly as before.</p></div>
+    <div class="card"><h4>Leaves nothing behind</h4><p>Uninstall strips every note FootNote ever created, from both storage backends, and removes all registry entries and local data. No orphaned hidden data with no app left to manage it.</p></div>
     <div class="card"><h4>Cross-device by riding existing sync</h4><p>Inside Google Drive Desktop or OneDrive folders, notes are written as small hidden files the sync engine uploads like anything else — so a note tagged on PC A appears on PC B. No accounts, no provider APIs, no internet dependency.</p></div>
     <div class="card"><h4>Nothing is silently overwritten</h4><p>Both backends store a capped 20-entry version history rather than a single string. Sync conflicts and accidental edits are recoverable, not lossy.</p></div>
   </div>
 
   <h3>Competitive position</h3>
-  <p>Windows does ship a native "Comments" field (file Properties → Details), and FileTag was checked against it deliberately. The overlap is thin: the native field only exists for file types with a writable property handler (Office documents, some images and media) — plain text, PDFs, code, and arbitrary files can't be commented at all. Where it does work, it <em>modifies the file itself</em> (changing hashes and modified dates), is buried three dialogs deep, and displays nothing contextually. FileTag works on any file, never touches the file's content or timestamps, shows the note the moment the file is clicked, and syncs it across machines.</p>
+  <p>Windows does ship a native "Comments" field (file Properties → Details), and FootNote was checked against it deliberately. The overlap is thin: the native field only exists for file types with a writable property handler (Office documents, some images and media) — plain text, PDFs, code, and arbitrary files can't be commented at all. Where it does work, it <em>modifies the file itself</em> (changing hashes and modified dates), is buried three dialogs deep, and displays nothing contextually. FootNote works on any file, never touches the file's content or timestamps, shows the note the moment the file is clicked, and syncs it across machines.</p>
 
-  <h3>What FileTag deliberately is not</h3>
+  <h3>What FootNote deliberately is not</h3>
   <ul>
     <li><strong>Not a shell extension.</strong> No COM registration, no context-menu handler, no icon overlays — the historically fragile approach was rejected at design time. Detection is done with UI Automation from a normal user process.</li>
     <li><strong>Not a tagging database.</strong> The local index is a lookup cache only — rebuildable, never the source of truth.</li>
@@ -304,15 +304,15 @@
   <hr class="h2-rule">
 
   <h3 id="hotkey-chain">Hotkey resolution chain — never a dead key</h3>
-  <p>When the hotkey fires, FileTag resolves "which file do you mean?" through a strict fallback chain, so the shortcut always does something useful from anywhere in Windows:</p>
+  <p>When the hotkey fires, FootNote resolves "which file do you mean?" through a strict fallback chain, so the shortcut always does something useful from anywhere in Windows:</p>
   <div class="tablewrap"><table>
     <tr><th>#</th><th>Source</th><th>Detail</th></tr>
     <tr><td>1</td><td><strong>Explorer selection</strong></td><td>The single selected file in the foreground Explorer window (active tab on Win11), resolved via Shell automation</td></tr>
     <tr><td>2</td><td><strong>Desktop selection</strong></td><td>The selected desktop icon, resolved through the desktop's shell view (<code>IShellWindows.FindWindowSW</code>) — works even with OneDrive-redirected desktops</td></tr>
     <tr><td>3</td><td><strong>Clipboard file</strong></td><td>If nothing is selected anywhere but exactly one file was copied (Ctrl+C), that file is used — making "copy anywhere → hotkey" a universal gesture</td></tr>
-    <tr><td>4</td><td><strong>File picker</strong></td><td>Last resort: a standard open-file dialog titled "FileTag — choose a file to comment"</td></tr>
+    <tr><td>4</td><td><strong>File picker</strong></td><td>Last resort: a standard open-file dialog titled "FootNote — choose a file to comment"</td></tr>
   </table></div>
-  <p>Multi-selection and folders are deliberately ambiguous → a toast, not a guess. FileTag's own companion files (<code>.filetag</code>) can never themselves be commented or surfaced.</p>
+  <p>Multi-selection and folders are deliberately ambiguous → a toast, not a guess. FootNote's own companion files (<code>.footnote</code>) can never themselves be commented or surfaced.</p>
 
   <h3 id="settings">Settings — live-apply, no Save button</h3>
   <p>Tray icon → <strong>Settings…</strong>. Modeled on Windows' own Settings app: every change applies on the spot (bar repositions, accent recolors, hotkey re-registers) with disk writes debounced ~300&nbsp;ms. The window is sectioned, includes a live preview pane rendering a mock bar with current values, and always offers <strong>Reset to Defaults</strong>.</p>
@@ -325,7 +325,7 @@
     <tr><td>Behavior</td><td>Slide animation</td><td>On / off</td><td>On</td></tr>
     <tr><td>Hotkey</td><td>Add/edit shortcut</td><td>Click the box, press a combo — letters, digits, F-keys with ≥1 modifier. Conflicts are probed with a real <code>RegisterHotKey</code> attempt before accepting</td><td>Shift+Alt+N</td></tr>
   </table></div>
-  <p>Stored at <span class="path">%APPDATA%\FileTag\settings.json</span> with a <code>schemaVersion</code> field so future fields can migrate instead of resetting.</p>
+  <p>Stored at <span class="path">%APPDATA%\FootNote\settings.json</span> with a <code>schemaVersion</code> field so future fields can migrate instead of resetting.</p>
 
   <h3 id="toasts">Failure feedback — every time, not once</h3>
   <p>Failures toast on every occurrence (unlike the one-time first-run balloon), but only from an <em>active</em> hotkey attempt or a save — passive browsing never toasts, so scrolling a folder of unsupported files stays silent. Every failure toast also writes a matching <code>ERROR</code> line to the log: the toast disappears in seconds, the log line doesn't.</p>
@@ -341,8 +341,8 @@
   <h3>Everything else</h3>
   <ul>
     <li><strong>Tray icon</strong> — the app's only always-visible surface: Settings…, Open logs folder, Start with Windows toggle, Check for updates, Exit.</li>
-    <li><strong>First run</strong> — one balloon, shown once ever: "FileTag is running. Select a file and press [hotkey] to add a comment."</li>
-    <li><strong>Relocation notice</strong> — launching the exe from a new folder shows "FileTag is running — now installed at …", so a portable launch never looks like a no-op.</li>
+    <li><strong>First run</strong> — one balloon, shown once ever: "FootNote is running. Select a file and press [hotkey] to add a comment."</li>
+    <li><strong>Relocation notice</strong> — launching the exe from a new folder shows "FootNote is running — now installed at …", so a portable launch never looks like a no-op.</li>
     <li><strong>Update check</strong> — on launch, a background query of the GitHub latest-release tag; a newer version produces one quiet balloon linking to the download page. Never auto-installs, never nags, fails silently offline.</li>
   </ul>
 </section>
@@ -354,8 +354,8 @@
   <p>Notes are stored through one of two interchangeable backends behind a single <code>ICommentStore</code> interface, chosen automatically per file. Nothing above the router knows or cares which backend owns a file.</p>
 
   <div class="grid2">
-    <div class="card"><h4>AdsStore — local NTFS drives</h4><p>The note lives <em>inside</em> the file as a named alternate data stream: <code>report.xlsx:FileTag.txt</code>. Invisible, zero extra files, and renames/moves within NTFS carry it automatically. File timestamps are captured and restored around every write so the file looks untouched.</p></div>
-    <div class="card"><h4>SidecarStore — cloud folders &amp; non-NTFS</h4><p>The note lives in a small hidden companion file: <code>report.xlsx.filetag</code>, same folder. Used where streams don't exist (FAT32/exFAT) or wouldn't survive (cloud sync uploads strip ADS — a plain hidden file uploads fine, which is what makes notes appear on a second PC).</p></div>
+    <div class="card"><h4>AdsStore — local NTFS drives</h4><p>The note lives <em>inside</em> the file as a named alternate data stream: <code>report.xlsx:FootNote.txt</code>. Invisible, zero extra files, and renames/moves within NTFS carry it automatically. File timestamps are captured and restored around every write so the file looks untouched.</p></div>
+    <div class="card"><h4>SidecarStore — cloud folders &amp; non-NTFS</h4><p>The note lives in a small hidden companion file: <code>report.xlsx.footnote</code>, same folder. Used where streams don't exist (FAT32/exFAT) or wouldn't survive (cloud sync uploads strip ADS — a plain hidden file uploads fine, which is what makes notes appear on a second PC).</p></div>
   </div>
 
   <h3 id="routing">Routing rules</h3>
@@ -397,11 +397,11 @@ flowchart TD
   </div>
   <div class="callout">
     <div class="c-label">Collaborator visibility — mitigated, not hidden</div>
-    Companion files are hidden in your own Explorer but fully visible to anyone else sharing the Drive/OneDrive folder — on the web, on phones, on Macs. So the first note saved into a detected sync root also drops a one-time <code>_FileTag_ReadMe.txt</code> there (only if absent, targeting <em>My Drive</em> on letter-mounted Google Drive since the virtual root isn't writable), turning a confusing stray file into a self-explanatory one.
+    Companion files are hidden in your own Explorer but fully visible to anyone else sharing the Drive/OneDrive folder — on the web, on phones, on Macs. So the first note saved into a detected sync root also drops a one-time <code>_FootNote_ReadMe.txt</code> there (only if absent, targeting <em>My Drive</em> on letter-mounted Google Drive since the virtual root isn't writable), turning a confusing stray file into a self-explanatory one.
   </div>
 
   <h3>The local index — cache, never truth</h3>
-  <p><span class="path">%LOCALAPPDATA%\FileTag\index.json</span> tracks which paths currently carry a note, so future features (search, export, bulk manage) never need a full-drive rescan. It stores <em>paths only, never note text</em>, is fully rebuildable, and can go stale but never wrong — note text always lives in whichever backend owns the file. Its one load-bearing job today: telling the uninstaller which files to clean.</p>
+  <p><span class="path">%LOCALAPPDATA%\FootNote\index.json</span> tracks which paths currently carry a note, so future features (search, export, bulk manage) never need a full-drive rescan. It stores <em>paths only, never note text</em>, is fully rebuildable, and can go stale but never wrong — note text always lives in whichever backend owns the file. Its one load-bearing job today: telling the uninstaller which files to clean.</p>
 </section>
 
 <!-- ============================================================ -->
@@ -414,7 +414,7 @@ flowchart LR
       EX["Explorer windows,<br/>tabs &amp; desktop"]
       REG["HKCU registry"]
     end
-    subgraph APP["FileTag.App (tray process)"]
+    subgraph APP["FootNote.App (tray process)"]
       EW["ExplorerWatcher<br/>UI Automation events +<br/>foreground WinEvent hook"]
       HK["HotkeyManager<br/>RegisterHotKey, remappable"]
       CO["App coordinator<br/>debounced evaluate"]
@@ -423,10 +423,10 @@ flowchart LR
       TR["TrayIcon + ToastManager"]
       UW["Uninstall wizard<br/>(--uninstall mode)"]
     end
-    subgraph CORE["FileTag.Core"]
+    subgraph CORE["FootNote.Core"]
       SR["StorageRouter"]
       ADS["AdsHelper<br/>NTFS streams"]
-      SC["SidecarHelper<br/>.filetag files"]
+      SC["SidecarHelper<br/>.footnote files"]
       CFD["CloudFolderDetector"]
       IX["IndexStore"]
       LG["Logger"]
@@ -460,23 +460,23 @@ flowchart LR
   <p>One shared <code>Logger</code> in Core, used by Setup, the app, and Uninstall alike — plain text that opens in Notepad, format <code>timestamp | LEVEL | component | message</code>, levels <code>INFO</code> / <code>WARN</code> / <code>ERROR</code>. The app log rolls daily (or at 5&nbsp;MB) and keeps ~7 days. Tray → <strong>Open logs folder</strong> jumps straight there. Logging can never throw into the code it observes.</p>
 
   <h3>Solution layout</h3>
-  <pre class="block"><code>FileTag.Core/          storage layer + shared services (no UI)
+  <pre class="block"><code>FootNote.Core/          storage layer + shared services (no UI)
   ICommentStore.cs     shared interface: HasComment / Read / Write / Delete
   AdsHelper.cs         ADS backend          SidecarHelper.cs   sidecar backend
   StorageRouter.cs     routing + facade     CloudFolderDetector.cs
   Note.cs              model + history      NoteFormat.cs      3-format parser
   IndexStore.cs        path cache           Logger.cs          shared logging
 
-FileTag.App/           WPF tray app
+FootNote.App/           WPF tray app
   App.xaml.cs          coordinator          ExplorerWatcher.cs
   OverlayBar.xaml      the bar              HotkeyManager.cs
   TrayIcon.cs          ToastManager.cs      ShellSelection.cs
   UninstallWindow.xaml + UninstallRunner.cs (--uninstall mode)
   Settings/            AppSettings · SettingsService · ViewModel · Window
 
-FileTag.Setup/         WPF install wizard (payload zip embedded at build)
-FileTag.Uninstaller/   12 MB stub → launches FileTag.App --uninstall
-FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre>
+FootNote.Setup/         WPF install wizard (payload zip embedded at build)
+FootNote.Uninstaller/   12 MB stub → launches FootNote.App --uninstall
+FootNote.ConsoleTest/   42-check storage test suite + live probe mode</code></pre>
 </section>
 
 <!-- ============================================================ -->
@@ -485,17 +485,17 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
   <hr class="h2-rule">
   <p>Distributed free via GitHub Releases in two forms. Everything is per-user: no admin prompt, ever.</p>
 
-  <h3>FileTag-Setup.exe — the recommended path</h3>
-  <p>A small custom WPF installer in the app's own design language, not an off-the-shelf wizard. Five screens: <strong>Welcome → Install location</strong> (default <span class="path">%LOCALAPPDATA%\FileTag</span>, Browse to change) <strong>→ Options</strong> (launch on startup ✓, launch after install ✓) <strong>→ Progress → Finish</strong> (with an "Open Settings" button). Progress shows four <em>real</em> steps, each reported only when its work actually completed and each logged to <code>install.log</code>: copying files → registering startup → detecting cloud folders → writing the Apps&nbsp;&amp;&nbsp;Features entry.</p>
+  <h3>FootNote-Setup.exe — the recommended path</h3>
+  <p>A small custom WPF installer in the app's own design language, not an off-the-shelf wizard. Five screens: <strong>Welcome → Install location</strong> (default <span class="path">%LOCALAPPDATA%\FootNote</span>, Browse to change) <strong>→ Options</strong> (launch on startup ✓, launch after install ✓) <strong>→ Progress → Finish</strong> (with an "Open Settings" button). Progress shows four <em>real</em> steps, each reported only when its work actually completed and each logged to <code>install.log</code>: copying files → registering startup → detecting cloud folders → writing the Apps&nbsp;&amp;&nbsp;Features entry.</p>
 
   <h3>Portable zip</h3>
-  <p>Extract anywhere, run <code>FileTag.App.exe</code>. The app self-registers on every launch — startup entry (honoring the user's toggle) and the Apps&nbsp;&amp;&nbsp;Features entry — and re-points both automatically if the folder moves. Zip and Setup produce identical registration.</p>
+  <p>Extract anywhere, run <code>FootNote.App.exe</code>. The app self-registers on every launch — startup entry (honoring the user's toggle) and the Apps&nbsp;&amp;&nbsp;Features entry — and re-points both automatically if the folder moves. Zip and Setup produce identical registration.</p>
 
   <h3>Updates</h3>
   <p>No store means no auto-update: the app quietly checks the GitHub latest-release tag at launch and shows one balloon if newer. Updating is: exit → extract new zip over the folder (or run the new Setup) → done. Notes and settings are unaffected by updates.</p>
 
   <h3 id="uninstall">Uninstall — a wizard, never silent</h3>
-  <p>Uninstall is destructive by deliberate decision — it strips every note FileTag created — so it is never one-click. <em>Confirm</em> states the real number: "delete comments from N tagged files", pulled live from the index. <em>Progress</em> counts through "Removing comment 14 of 42…". <em>Finish</em> summarizes removed vs. skipped with a link to the log.</p>
+  <p>Uninstall is destructive by deliberate decision — it strips every note FootNote created — so it is never one-click. <em>Confirm</em> states the real number: "delete comments from N tagged files", pulled live from the index. <em>Progress</em> counts through "Removing comment 14 of 42…". <em>Finish</em> summarizes removed vs. skipped with a link to the log.</p>
   <ol>
     <li>Strip every indexed note via its backend — stream or sidecar; the files themselves untouched. Moved/deleted files are skipped and logged, not failures. Orphaned sidecars are cleaned even when the original file is gone.</li>
     <li>Stop the running tray process.</li>
@@ -505,18 +505,18 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
   </ol>
   <div class="callout">
     <div class="c-label">Engineering note — reinstall race guard</div>
-    The scheduled folder deletion is authorized by a sentinel file. Launching FileTag — or running Setup — into that folder removes the sentinel, cancelling a still-pending deletion instead of letting it eat the freshly installed files. A normal uninstall with no reinstall still cleans up completely.
+    The scheduled folder deletion is authorized by a sentinel file. Launching FootNote — or running Setup — into that folder removes the sentinel, cancelling a still-pending deletion instead of letting it eat the freshly installed files. A normal uninstall with no reinstall still cleans up completely.
   </div>
   <div class="callout">
     <div class="c-label">Engineering note — wizard without the weight</div>
-    <code>Uninstall.exe</code> (what Apps &amp; Features invokes) is a 12&nbsp;MB stub that launches <code>FileTag.App.exe --uninstall</code>, which hosts the wizard UI. A standalone WPF uninstaller would have shipped a second ~80&nbsp;MB runtime for three screens.
+    <code>Uninstall.exe</code> (what Apps &amp; Features invokes) is a 12&nbsp;MB stub that launches <code>FootNote.App.exe --uninstall</code>, which hosts the wizard UI. A standalone WPF uninstaller would have shipped a second ~80&nbsp;MB runtime for three screens.
   </div>
 
   <h3>Release artifacts</h3>
   <div class="tablewrap"><table>
     <tr><th>Artifact</th><th>Size</th><th>Purpose</th></tr>
-    <tr><td><code>FileTag-Setup-vX.Y.Z.exe</code></td><td>~137 MB</td><td>Wizard installer, payload embedded, self-contained</td></tr>
-    <tr><td><code>FileTag-vX.Y.Z-win-x64.zip</code></td><td>~68 MB</td><td>Portable: app + Uninstall.exe + README</td></tr>
+    <tr><td><code>FootNote-Setup-vX.Y.Z.exe</code></td><td>~137 MB</td><td>Wizard installer, payload embedded, self-contained</td></tr>
+    <tr><td><code>FootNote-vX.Y.Z-win-x64.zip</code></td><td>~68 MB</td><td>Portable: app + Uninstall.exe + README</td></tr>
   </table></div>
   <p>Binaries are unsigned (the $0 constraint), so SmartScreen shows "unrecognized app" on first run — <em>More info → Run anyway</em>. Old release artifacts and git tags are preserved on every version bump.</p>
 </section>
@@ -527,15 +527,15 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
   <hr class="h2-rule">
   <div class="tablewrap"><table>
     <tr><th>Location</th><th>What</th><th>Removed on uninstall</th></tr>
-    <tr><td><span class="path">&lt;install dir&gt;</span></td><td>FileTag.App.exe · Uninstall.exe · README.md</td><td><span class="pill ok">YES</span></td></tr>
-    <tr><td><span class="path">&lt;file&gt;:FileTag.txt</span></td><td>Note stream on NTFS files</td><td><span class="pill ok">YES</span></td></tr>
-    <tr><td><span class="path">&lt;file&gt;.filetag</span></td><td>Hidden companion note file (cloud / non-NTFS)</td><td><span class="pill ok">YES</span></td></tr>
-    <tr><td><span class="path">%LOCALAPPDATA%\FileTag\index.json</span></td><td>Path index (cache)</td><td><span class="pill ok">YES</span></td></tr>
-    <tr><td><span class="path">%APPDATA%\FileTag\settings.json</span></td><td>Settings (schema-versioned)</td><td><span class="pill ok">YES</span></td></tr>
-    <tr><td><span class="path">%APPDATA%\FileTag\logs\</span></td><td>filetag.log (rolling ~7 days) · install.log</td><td><span class="pill ok">YES</span></td></tr>
-    <tr><td><span class="path">%TEMP%\FileTag-uninstall.log</span></td><td>Uninstall record</td><td><span class="pill no">KEPT</span> (by design)</td></tr>
-    <tr><td><span class="path">HKCU\…\CurrentVersion\Run → FileTag</span></td><td>Start-with-Windows entry</td><td><span class="pill ok">YES</span></td></tr>
-    <tr><td><span class="path">HKCU\…\CurrentVersion\Uninstall\FileTag</span></td><td>Apps &amp; Features entry (DisplayName, DisplayVersion, Publisher, InstallLocation, UninstallString, NoModify=1, NoRepair=1, EstimatedSize)</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">&lt;install dir&gt;</span></td><td>FootNote.App.exe · Uninstall.exe · README.md</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">&lt;file&gt;:FootNote.txt</span></td><td>Note stream on NTFS files</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">&lt;file&gt;.footnote</span></td><td>Hidden companion note file (cloud / non-NTFS)</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%LOCALAPPDATA%\FootNote\index.json</span></td><td>Path index (cache)</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%APPDATA%\FootNote\settings.json</span></td><td>Settings (schema-versioned)</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%APPDATA%\FootNote\logs\</span></td><td>footnote.log (rolling ~7 days) · install.log</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">%TEMP%\FootNote-uninstall.log</span></td><td>Uninstall record</td><td><span class="pill no">KEPT</span> (by design)</td></tr>
+    <tr><td><span class="path">HKCU\…\CurrentVersion\Run → FootNote</span></td><td>Start-with-Windows entry</td><td><span class="pill ok">YES</span></td></tr>
+    <tr><td><span class="path">HKCU\…\CurrentVersion\Uninstall\FootNote</span></td><td>Apps &amp; Features entry (DisplayName, DisplayVersion, Publisher, InstallLocation, UninstallString, NoModify=1, NoRepair=1, EstimatedSize)</td><td><span class="pill ok">YES</span></td></tr>
   </table></div>
 </section>
 
@@ -591,7 +591,7 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
   <h2><span class="no">11</span>Quality &amp; verification</h2>
   <hr class="h2-rule">
   <ul>
-    <li><strong>Storage suite: 42 automated checks</strong> covering both backends — write/read/delete, rename &amp; move survival, host-file timestamp preservation, history capping and ordering, the 500-char cap, legacy-format parsing and upgrade, hidden-sidecar overwrite, ADS→sidecar migration with history intact, orphaned-sidecar cleanup, and index round-trips. Plus a live-probe mode (<code>FileTag.ConsoleTest &lt;path&gt; [text]</code>) that reports routing and saves against real files.</li>
+    <li><strong>Storage suite: 42 automated checks</strong> covering both backends — write/read/delete, rename &amp; move survival, host-file timestamp preservation, history capping and ordering, the 500-char cap, legacy-format parsing and upgrade, hidden-sidecar overwrite, ADS→sidecar migration with history intact, orphaned-sidecar cleanup, and index round-trips. Plus a live-probe mode (<code>FootNote.ConsoleTest &lt;path&gt; [text]</code>) that reports routing and saves against real files.</li>
     <li><strong>Live end-to-end verification on a real machine:</strong> passive display and hotkey editing driven through actual Explorer windows and the actual desktop; clipboard and picker fallbacks; settings changes (edge, accent, auto-hide, hotkey remap) confirmed visually taking effect; sidecar notes created through the UI inside a real Google Drive mount.</li>
     <li><strong>Full lifecycle tested:</strong> Setup wizard (silent and interactive) → use → uninstall wizard, with registry, files, logs, and stripped notes verified at each stage — including the uninstall-then-quick-reinstall race.</li>
     <li><strong>Defender scans clean</strong> on ADS writes, the app, the zip, and the Setup exe.</li>
@@ -640,18 +640,18 @@ FileTag.ConsoleTest/   42-check storage test suite + live probe mode</code></pre
   <hr class="h2-rule">
   <div class="tablewrap"><table>
     <tr><th>Symptom</th><th>Explanation / fix</th></tr>
-    <tr><td>Ran <code>FileTag.App.exe</code>, "nothing happened"</td><td>The portable exe is not a wizard — it starts in the tray and shows a balloon. The install wizard is <code>FileTag-Setup.exe</code>.</td></tr>
-    <tr><td>Hotkey does nothing</td><td>Another app owns the combo — FileTag toasts about this at startup. Remap in Settings (a real registration probe validates the new combo).</td></tr>
+    <tr><td>Ran <code>FootNote.App.exe</code>, "nothing happened"</td><td>The portable exe is not a wizard — it starts in the tray and shows a balloon. The install wizard is <code>FootNote-Setup.exe</code>.</td></tr>
+    <tr><td>Hotkey does nothing</td><td>Another app owns the combo — FootNote toasts about this at startup. Remap in Settings (a real registration probe validates the new combo).</td></tr>
     <tr><td>Input language flips when using the hotkey</td><td>Shift+Alt is Windows' language switcher when multiple input languages are installed. Remap, or remove unused languages.</td></tr>
     <tr><td>Bar doesn't appear on click</td><td>Passive display covers Explorer windows and the desktop, and only files that actually have a note. Multi-selection is deliberately silent.</td></tr>
     <tr><td>Note vanished after copying a file to USB / email</td><td>Expected on untracked transfers — see Known limitations. Within NTFS drives and supported cloud folders, notes travel.</td></tr>
     <tr><td>SmartScreen warns on first run</td><td>Binaries are unsigned. More info → Run anyway.</td></tr>
-    <tr><td>Anything unclear</td><td>Tray → <strong>Open logs folder</strong> — every install step, save, failure, and uninstall action is a plain-text log line. Deep tracing: set <code>FILETAG_DEBUG=1</code> before launch.</td></tr>
+    <tr><td>Anything unclear</td><td>Tray → <strong>Open logs folder</strong> — every install step, save, failure, and uninstall action is a plain-text log line. Deep tracing: set <code>FOOTNOTE_DEBUG=1</code> before launch.</td></tr>
   </table></div>
 </section>
 
 <footer class="doc-footer">
-  <span>FileTag Product Document · v4.1.0</span>
+  <span>FootNote Product Document · v4.1.0</span>
   <span>Windows 10/11 · .NET 8 · WPF</span>
   <span>Free · GitHub Releases · no accounts, no telemetry</span>
 </footer>

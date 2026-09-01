@@ -1,0 +1,19 @@
+﻿FootNote - what these files are
+================================
+
+FootNote-Setup.exe  <- RUN THIS to install (recommended).
+                       A short wizard: Welcome -> Location -> Options -> Done.
+
+FootNote.App.exe    <- The app itself (portable option). Running it directly
+                       from any folder installs FootNote right there - no wizard,
+                       it appears in the system tray and shows a balloon.
+
+Uninstall.exe       <- The uninstaller. Also reachable any time via Windows
+                       Settings -> Apps -> FootNote -> Uninstall. It removes only
+                       FootNote's own files - anything else in the folder stays.
+                       It must sit next to FootNote.App.exe to work.
+
+README.txt          <- Full instructions, tips, and limitations.
+
+Notes work on files AND folders. Only one copy of FootNote runs at a time -
+launching a second shows a message pointing to the one already in the tray.
