@@ -14,7 +14,6 @@
         </Style>
         <Style TargetType="Button">
             <Setter Property="Padding" Value="18,7"/>
-            <Setter Property="Margin" Value="8,0,0,0"/>
             <Setter Property="Background" Value="#3D3D4D"/>
             <Setter Property="Foreground" Value="{StaticResource Text}"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -113,7 +112,7 @@
             <TextBlock Text="Install location" FontSize="20" FontWeight="SemiBold"/>
             <Border Style="{StaticResource Card}">
                 <DockPanel>
-                    <Button DockPanel.Dock="Right" Content="Browse…" Click="Browse_Click" VerticalAlignment="Center"/>
+                    <Button DockPanel.Dock="Right" Content="Browse…" Margin="8,0,0,0" Click="Browse_Click" VerticalAlignment="Center"/>
                     <TextBox x:Name="DirBox" Background="#3D3D4D" Foreground="{StaticResource Text}"
                              BorderBrush="#5A5A6E" Padding="8,6" VerticalAlignment="Center"
                              CaretBrush="{StaticResource Text}"/>
@@ -162,10 +161,10 @@
                        Foreground="{StaticResource Dim}" VerticalAlignment="Center"/>
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button x:Name="CancelBtn" Content="Cancel" Click="Cancel_Click"/>
-                <Button x:Name="BackBtn" Content="Back" Click="Back_Click" Visibility="Collapsed"/>
-                <Button x:Name="OpenSettingsBtn" Content="Open Settings" Click="OpenSettings_Click"
+                <Button x:Name="BackBtn" Content="Back" Margin="8,0,0,0" Click="Back_Click" Visibility="Collapsed"/>
+                <Button x:Name="OpenSettingsBtn" Content="Open Settings" Margin="8,0,0,0" Click="OpenSettings_Click"
                         Visibility="Collapsed"/>
-                <Button x:Name="NextBtn" Content="Next" Style="{StaticResource AccentBtn}" Click="Next_Click"/>
+                <Button x:Name="NextBtn" Content="Next" Style="{StaticResource AccentBtn}" Margin="8,0,0,0" Click="Next_Click"/>
             </StackPanel>
         </DockPanel>
     </Grid>

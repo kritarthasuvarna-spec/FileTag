@@ -3,6 +3,18 @@
 Record of what was actually implemented, tested, fixed, or deferred per
 release. User-facing notes live in `FootNote.App/Assets/PatchNotes.json`.
 
+## 5.7.3 — 2026-09-01
+- Setup's "already installed" screen had a real 8px misalignment: the
+  base Button style set a blanket `Margin="8,0,0,0"` (meant only to
+  space the footer's Cancel/Back/Next buttons apart), which also shifted
+  UpdateBtn — the only button in that vertical layout without its own
+  explicit margin — 8px right of the card above it. Verified with a
+  pixel scan (card and button edges both now land at x=36/503 exactly).
+  Removed the blanket margin from the base style and moved it to the
+  three footer buttons that actually need horizontal spacing (Back,
+  Open Settings, Next) plus the Location panel's Browse button, which
+  relied on the same removed default for its gap from the text field.
+
 ## 5.7.2 — 2026-09-01
 - Setup's "already installed" screen was calling a genuine pre-rebrand
   FileTag install "FootNote vX.X.X is already installed" — confusing for
