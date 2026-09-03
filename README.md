@@ -3,6 +3,8 @@
   <img alt="footnote" src="docs/brand/wordmark-light.svg" width="360">
 </picture>
 
+**Beta.** Feature-complete and used daily, but still only tested by one person on one machine — no crash telemetry yet, and edge cases are still turning up. Back up anything critical, and [open an issue](../../issues) if something breaks.
+
 ### The sticky note Windows forgot to build in.
 
 Six months from now you'll open some file and think *"wait, why did I keep this?"*
