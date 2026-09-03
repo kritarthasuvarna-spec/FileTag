@@ -95,7 +95,8 @@
         <!-- 1. Welcome -->
         <StackPanel x:Name="WelcomePanel" Grid.Row="0">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="📝" FontSize="30" Margin="0,0,12,0"/>
+                <Ellipse Width="28" Height="28" Margin="0,0,12,0" VerticalAlignment="Center"
+                         Fill="{StaticResource BrandMarkBrush}"/>
                 <TextBlock Text="FootNote" FontSize="30" FontWeight="SemiBold"/>
             </StackPanel>
             <TextBlock Text="Attach a personal note to any file — stored invisibly with the file, synced across your PCs in Google Drive and OneDrive folders."

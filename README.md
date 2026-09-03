@@ -1,4 +1,7 @@
-# 📝 FootNote
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/wordmark-dark.svg">
+  <img alt="footnote" src="docs/brand/wordmark-light.svg" width="360">
+</picture>
 
 ### The sticky note Windows forgot to build in.
 

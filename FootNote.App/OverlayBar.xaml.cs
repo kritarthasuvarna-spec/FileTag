@@ -25,6 +25,7 @@ public partial class OverlayBar : Window
 
     public BarState State { get; private set; } = BarState.Hidden;
     public bool IsEditing => State == BarState.Edit;
+    public bool IsConfirmingDelete => State == BarState.ConfirmDelete;
 
     /// <summary>True only when the user actually typed something in edit mode —
     /// an untouched editor may be abandoned when the selection moves on.</summary>
@@ -37,6 +38,12 @@ public partial class OverlayBar : Window
 
     /// <summary>Raised only by an explicit click on the red Delete button.</summary>
     public event Action<string>? DeleteConfirmed;
+
+    /// <summary>Raised only by an explicit click on the Close (✕) button — lets
+    /// the app suppress the very next auto-show for this path, since clicking
+    /// the bar itself can trigger a UIA event that would otherwise immediately
+    /// re-evaluate the still-selected file and show it right back.</summary>
+    public event Action<string>? Dismissed;
 
     private Note? _currentNote;
     private IntPtr _hwnd;
@@ -56,6 +63,7 @@ public partial class OverlayBar : Window
             ApplySettings(); // acrylic needs the hwnd
         };
         SizeChanged += (_, _) => { if (State != BarState.Hidden) Reposition(); };
+        RootBorder.SizeChanged += (_, _) => UpdateRootClip();
 
         _autoHide.Tick += (_, _) =>
         {
@@ -125,6 +133,44 @@ public partial class OverlayBar : Window
         }
 
         if (_hwnd != IntPtr.Zero) ApplyAcrylic(s, panel);
+        ApplyBloom(s);
+        UpdateRootClip();
+    }
+
+    /// <summary>Clips content (the ink bloom, mainly) to the card's own
+    /// rounded corners — Border doesn't do this to its children automatically,
+    /// and an unclipped blurred glow would bleed past the rounded edge.</summary>
+    private void UpdateRootClip()
+    {
+        if (RootBorder.ActualWidth <= 0 || RootBorder.ActualHeight <= 0) return;
+        double r = RootBorder.CornerRadius.TopLeft;
+        RootBorder.Clip = new RectangleGeometry(
+            new Rect(0, 0, RootBorder.ActualWidth, RootBorder.ActualHeight), r, r);
+    }
+
+    /// <summary>Sets the two ink-bloom layers from Settings' global bloom
+    /// color, or hides them entirely when bloom is off (the default).</summary>
+    private void ApplyBloom(AppSettings s)
+    {
+        Color color = default;
+        bool valid = s.BloomEnabled;
+        if (valid)
+        {
+            try { color = (Color)ColorConverter.ConvertFromString(s.BloomColor); }
+            catch { valid = false; }
+        }
+
+        if (!valid)
+        {
+            BloomPrimary.Visibility = Visibility.Collapsed;
+            BloomSecondary.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        BloomPrimaryStop.Color = color;
+        BloomSecondaryStop.Color = color;
+        BloomPrimary.Visibility = Visibility.Visible;
+        BloomSecondary.Visibility = Visibility.Visible;
     }
 
     private void ApplyAcrylic(AppSettings s, Color panel)
@@ -242,7 +288,11 @@ public partial class OverlayBar : Window
         if (CurrentPath is not null) ShowEdit(CurrentPath, _currentNote, _explorerHwnd);
     }
 
-    private void CloseButton_Click(object sender, RoutedEventArgs e) => HideBar();
+    private void CloseButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (CurrentPath is not null) Dismissed?.Invoke(CurrentPath);
+        HideBar();
+    }
 
     private void DeleteButton_Click(object sender, RoutedEventArgs e)
     {
@@ -329,6 +379,16 @@ public partial class OverlayBar : Window
         ex |= NativeMethods.WS_EX_TOOLWINDOW;
         ex = on ? ex | NativeMethods.WS_EX_NOACTIVATE : ex & ~NativeMethods.WS_EX_NOACTIVATE;
         NativeMethods.SetWindowLong(_hwnd, NativeMethods.GWL_EXSTYLE, ex);
+
+        // A style set via SetWindowLong is cached by the OS and doesn't take
+        // effect until a SetWindowPos call — without this, the window's very
+        // first Show() after toggling NOACTIVATE can still activate/steal
+        // focus once (which is what made the Close button need a second
+        // click, exactly once per app launch). SWP_FRAMECHANGED forces the
+        // cached style to refresh immediately.
+        NativeMethods.SetWindowPos(_hwnd, IntPtr.Zero, 0, 0, 0, 0,
+            NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOZORDER |
+            NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_FRAMECHANGED);
     }
 
     /// <summary>Off-screen offset for the slide: positive when docked bottom, negative for top.</summary>

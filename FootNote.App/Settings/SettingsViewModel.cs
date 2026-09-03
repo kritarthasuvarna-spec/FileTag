@@ -104,6 +104,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     /// <summary>Swatch click helper.</summary>
     public void SetAccent(string hex) => AccentColor = hex;
 
+    /// <summary>Swatch click helper.</summary>
+    public void SetBloomColor(string hex) => BloomColor = hex;
+
     // ---- Panel appearance ---------------------------------------------------
 
     public bool StyleBar
@@ -169,6 +172,39 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         get => S.Translucency;
         set { S.Translucency = value; Changed(); Raise(); }
+    }
+
+    public bool BloomEnabled
+    {
+        get => S.BloomEnabled;
+        set { S.BloomEnabled = value; Changed(); Raise(); }
+    }
+
+    public string BloomColor
+    {
+        get => S.BloomColor;
+        set
+        {
+            string v = value?.Trim() ?? "";
+            if (!v.StartsWith('#')) v = "#" + v;
+            try
+            {
+                ColorConverter.ConvertFromString(v);
+                S.BloomColor = v;
+                Changed();
+            }
+            catch { /* invalid hex — ignore */ }
+            Raise(); Raise(nameof(BloomBrush));
+        }
+    }
+
+    public System.Windows.Media.Brush BloomBrush
+    {
+        get
+        {
+            try { return new SolidColorBrush((Color)ColorConverter.ConvertFromString(S.BloomColor)); }
+            catch { return Brushes.SteelBlue; }
+        }
     }
 
     // ---- Behavior -----------------------------------------------------------

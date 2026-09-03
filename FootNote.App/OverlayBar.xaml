@@ -57,21 +57,65 @@
         </Style>
     </Window.Resources>
 
-    <Border x:Name="RootBorder" Background="#F51E1E2B" CornerRadius="12,12,0,0"
-            BorderBrush="#33FFFFFF" BorderThickness="1,1,1,0" Padding="18,11,18,13">
+    <!-- The slide animation's RenderTransform lives on this outer, unstyled
+         wrapper — keeping it off RootBorder itself, since a Clip (for the ink
+         bloom, below) on the same element as a RenderTransform can make WPF
+         render descendant Effects as hard-edged instead of blurred. -->
+    <Border x:Name="SlideWrapper">
         <Border.RenderTransform>
             <TranslateTransform x:Name="SlideTransform" Y="0"/>
         </Border.RenderTransform>
+    <Border x:Name="RootBorder" Background="#F51E1E2B" CornerRadius="12,12,0,0"
+            BorderBrush="#33FFFFFF" BorderThickness="1,1,1,0" Padding="18,11,18,13">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <!-- Ink bloom: a soft organic glow behind all content, driven by
+                 Settings. Each layer sits in its own zero-size Canvas —
+                 unlike a plain Grid child, a Canvas never reports its
+                 children's size to its parent, so the 220px/90px ellipses
+                 can't inflate the bar's Auto rows (and therefore the whole
+                 window, which sizes to content) even though they're visible. -->
+            <Canvas Grid.Row="0" Grid.RowSpan="2" Width="0" Height="0"
+                    HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Ellipse x:Name="BloomPrimary" Canvas.Left="-44" Canvas.Top="-66"
+                         Width="220" Height="220" Opacity="0.35" Visibility="Collapsed"
+                         IsHitTestVisible="False">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="34"/>
+                    </Ellipse.Effect>
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop x:Name="BloomPrimaryStop" Color="#4F8EF7" Offset="0"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+            </Canvas>
+            <Canvas Grid.Row="0" Grid.RowSpan="2" Width="0" Height="0"
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom">
+                <Ellipse x:Name="BloomSecondary" Canvas.Left="-82" Canvas.Top="-78"
+                         Width="90" Height="90" Opacity="0.22" Visibility="Collapsed"
+                         IsHitTestVisible="False">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="20"/>
+                    </Ellipse.Effect>
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop x:Name="BloomSecondaryStop" Color="#4F8EF7" Offset="0"/>
+                            <GradientStop Color="Transparent" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+            </Canvas>
+
             <!-- Header: file name · timestamp · actions -->
             <DockPanel Grid.Row="0" Margin="0,0,0,7" LastChildFill="False">
-                <TextBlock DockPanel.Dock="Left" Text="📝" FontSize="13" Margin="0,0,8,0"
-                           VerticalAlignment="Center"/>
+                <Ellipse DockPanel.Dock="Left" Width="12" Height="12" Margin="0,0,8,0"
+                         Fill="{StaticResource BrandMarkBrush}" VerticalAlignment="Center"/>
                 <TextBlock x:Name="FileNameText" DockPanel.Dock="Left" FontWeight="SemiBold"
                            FontSize="13" Foreground="{StaticResource TextBrush}"
                            VerticalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="480"/>
@@ -151,5 +195,6 @@
                 </DockPanel>
             </Grid>
         </Grid>
+    </Border>
     </Border>
 </Window>

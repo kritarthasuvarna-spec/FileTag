@@ -40,6 +40,12 @@ public sealed class AppSettings
     /// <summary>Real Windows acrylic blur behind the panel. Off by default (perf cost).</summary>
     public bool Translucency { get; set; }
 
+    /// <summary>Soft colored glow behind every note card.</summary>
+    public bool BloomEnabled { get; set; } = true;
+
+    /// <summary>Hex color for the bloom, independent of the accent color.</summary>
+    public string BloomColor { get; set; } = "#4F8EF7";
+
     [JsonIgnore] public bool IsPill => BarStyle.Equals("Pill", StringComparison.OrdinalIgnoreCase);
     [JsonIgnore] public double FontScaleFactor => FontScale.ToLowerInvariant() switch
     { "small" => 0.88, "large" => 1.15, _ => 1.0 };

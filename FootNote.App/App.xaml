@@ -4,6 +4,15 @@
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <FontFamily x:Key="AppFont">/Assets/Fonts/#Manrope</FontFamily>
+
+        <!-- Brand mark (Bleeding Drop): the one glyph used everywhere in
+             place of a generic icon — tray, bar header, Settings, Tutorial,
+             Setup welcome screen. -->
+        <RadialGradientBrush x:Key="BrandMarkBrush" Center="0.38,0.34" GradientOrigin="0.38,0.34"
+                              RadiusX="0.65" RadiusY="0.65">
+            <GradientStop Color="#8FB5FA" Offset="0"/>
+            <GradientStop Color="#4F8EF7" Offset="1"/>
+        </RadialGradientBrush>
         <Style TargetType="{x:Type Window}">
             <Setter Property="FontFamily" Value="{StaticResource AppFont}"/>
         </Style>

@@ -51,7 +51,7 @@ public partial class App : System.Windows.Application
         {
             // Dying silently here reads as "the app is broken" — say something.
             System.Windows.MessageBox.Show(
-                "FootNote is already running — look for the tag icon in the system tray.\n\n" +
+                "FootNote is already running — look for the icon in the system tray.\n\n" +
                 "To run this copy instead, exit the running one first (tray icon → Exit).",
                 "FootNote", MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown();
@@ -81,6 +81,7 @@ public partial class App : System.Windows.Application
         _bar = new OverlayBar();
         _bar.SaveRequested += OnSaveRequested;
         _bar.DeleteConfirmed += OnDeleteConfirmed;
+        _bar.Dismissed += path => _dismissedPath = path;
 
         _tray = new TrayIcon(_index, ExitApp, OpenSettings, OpenTutorial, OpenWhatsNew, OpenRecoverNotes);
         _toasts = new ToastManager(_tray);
@@ -111,7 +112,7 @@ public partial class App : System.Windows.Application
             // Not a first run, but the app moved (fresh extract, new folder):
             // without this, launching the exe looks like "nothing happened".
             _tray.ShowBalloon("FootNote is running",
-                $"Now installed at {currentLocation}. Look for the tag icon in the system tray.");
+                $"Now installed at {currentLocation}. Look for the icon in the system tray.");
         }
 
         _ = UpdateChecker.CheckAsync(_tray);
@@ -219,16 +220,38 @@ public partial class App : System.Windows.Application
                 if (_bar.IsEditingDirty || sameItem || sel is null) return;
             }
 
+            if (_bar.IsConfirmingDelete)
+            {
+                // Same racy re-evaluation that affected the ✕ button: clicking
+                // Delete (even though it never activates the bar) can still
+                // trigger a UIA event that fires this method again almost
+                // immediately. Without this guard, that re-evaluation sees the
+                // same still-selected, still-commented file and calls ShowRead,
+                // silently resetting the confirm prompt back to Read state —
+                // so the first Delete click looked like it did nothing.
+                bool sameItem = sel is { Count: 1 }
+                    && string.Equals(sel[0], _bar.CurrentPath, StringComparison.OrdinalIgnoreCase);
+                if (sameItem || sel is null) return;
+            }
+
             if (sel is not null)
             {
                 DebugLog.Write($"evaluate: fg={fg} cls={cls} sel=[{string.Join("; ", sel)}]");
+
+                // A file the user just closed via ✕ stays suppressed only while
+                // it's still the selection that triggered the close — once the
+                // selection actually moves elsewhere, it's fair game again.
+                bool stillDismissedItem = sel.Count == 1
+                    && string.Equals(sel[0], _dismissedPath, StringComparison.OrdinalIgnoreCase);
+                if (!stillDismissedItem) _dismissedPath = null;
+
                 // Exactly one file or folder (multi-select is ambiguous). A file
                 // mid-delete-grace-period still has its comment on disk, but must not
                 // be shown or re-indexed as commented — that's what "reappears after
                 // deleting" would look like to the user.
                 bool pendingDelete = sel.Count == 1
                     && string.Equals(sel[0], _pendingDeletePath, StringComparison.OrdinalIgnoreCase);
-                if (!pendingDelete && sel.Count == 1 && IsFileOrFolder(sel[0])
+                if (!pendingDelete && !stillDismissedItem && sel.Count == 1 && IsFileOrFolder(sel[0])
                     && !SidecarHelper.IsSidecar(sel[0]) && StorageRouter.HasComment(sel[0]))
                 {
                     var note = StorageRouter.ReadLatest(sel[0]);
@@ -337,6 +360,15 @@ public partial class App : System.Windows.Application
     // nothing has left the disk yet.
     private DispatcherTimer? _undoTimer;
     private string? _pendingDeletePath;
+
+    /// <summary>Path the user just explicitly closed via the ✕ button. Clicking
+    /// the bar (even though it never takes foreground) can still trigger a UIA
+    /// event that fires Evaluate() again almost immediately — without this,
+    /// that re-evaluation sees the same file still selected and still
+    /// commented, and shows the bar right back, so the first Close click
+    /// appears to do nothing. Cleared as soon as the selection actually moves
+    /// to something else, so reselecting the same file later works normally.</summary>
+    private string? _dismissedPath;
 
     private void OnDeleteConfirmed(string path)
     {

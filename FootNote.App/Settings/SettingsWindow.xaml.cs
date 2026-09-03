@@ -37,6 +37,22 @@ public partial class SettingsWindow : Window
             SwatchPanel.Children.Add(b);
         }
 
+        foreach (string hex in Swatches)
+        {
+            var b = new Button
+            {
+                Width = 24,
+                Height = 24,
+                Margin = new Thickness(0, 0, 6, 0),
+                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex)),
+                BorderThickness = new Thickness(0),
+                Cursor = Cursors.Hand,
+                Tag = hex,
+            };
+            b.Click += (_, _) => _vm.SetBloomColor((string)b.Tag);
+            BloomSwatchPanel.Children.Add(b);
+        }
+
         SettingsService.Instance.SettingsChanged += UpdatePreviewEdge;
         Closed += (_, _) => SettingsService.Instance.SettingsChanged -= UpdatePreviewEdge;
         UpdatePreviewEdge();

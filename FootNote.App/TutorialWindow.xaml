@@ -25,7 +25,8 @@
 
         <StackPanel Grid.Row="0">
             <StackPanel Orientation="Horizontal">
-                <TextBlock Text="📝" FontSize="24" Margin="0,0,10,0"/>
+                <Ellipse Width="22" Height="22" Margin="0,0,10,0" VerticalAlignment="Center"
+                         Fill="{StaticResource BrandMarkBrush}"/>
                 <TextBlock Text="Welcome to FootNote" FontSize="22" FontWeight="SemiBold"/>
             </StackPanel>
 
